@@ -1,0 +1,16 @@
+{
+  "name": "codepath-tutor-server",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Optional tutor proxy for CodePath. Keeps the API key on the server; the browser never sees it.",
+  "scripts": {
+    "start": "node tutor-server.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.124.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

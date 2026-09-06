@@ -18,6 +18,18 @@ export default defineConfig({
     target: 'es2022',
     sourcemap: false,
     chunkSizeWarningLimit: 1500,
+    rollupOptions: {
+      output: {
+        // Keep lesson content, the editor and React in separate chunks so a
+        // content update does not invalidate the cached vendor code.
+        manualChunks(id) {
+          if (id.includes('/src/content/')) return 'content';
+          if (id.includes('node_modules/@codemirror') || id.includes('node_modules/codemirror') || id.includes('node_modules/@uiw') || id.includes('node_modules/@lezer')) return 'editor';
+          if (id.includes('node_modules/react') || id.includes('node_modules/scheduler') || id.includes('node_modules/zustand')) return 'vendor';
+          return undefined;
+        },
+      },
+    },
   },
   server: {
     port: 5173,
