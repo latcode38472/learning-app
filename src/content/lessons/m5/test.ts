@@ -53,7 +53,7 @@ export const test: Assessment = {
             opt('`def show():`', 'השורה `def show():`', {
               feedback: ['That line defines the function; it does not run it.', 'השורה הזאת מגדירה את הפונקציה; היא לא מריצה אותה.'],
             }),
-            opt('`run show`', '`run show`', {
+            opt('`run show`', 'השורה `run show`', {
               feedback: ['That is not Python. A call is the name with parentheses: show().', 'זה לא פייתון. קריאה היא השם עם סוגריים: show().'],
             }),
           ],

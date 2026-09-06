@@ -78,9 +78,9 @@ export const project: Project = {
         ),
       ],
       hints: [
-        ['Each function is two lines: `def add(a, b):` and, indented, `return a + b`.', 'כל פונקציה היא שתי שורות: `def add(a, b):` ומתחתיה, מוזח, `return a + b`.'],
-        ['In divide, check first: `if b == 0:` then `return "Cannot divide by zero"`; after the if, `return a / b`.', 'ב-divide בדקו קודם: `if b == 0:` ואז `return "Cannot divide by zero"`; אחרי ה-if, `return a / b`.'],
-        ['If the check says a function returned None, you printed instead of returning.', 'אם הבדיקה אומרת שפונקציה החזירה None, הדפסתם במקום להחזיר.'],
+        t('Each function is two lines: `def add(a, b):` and, indented, `return a + b`.', 'כל פונקציה היא שתי שורות: `def add(a, b):` ומתחתיה, מוזח, `return a + b`.'),
+        t('In divide, check first: `if b == 0:` then `return "Cannot divide by zero"`; after the if, `return a / b`.', 'ב-divide בדקו קודם: `if b == 0:` ואז `return "Cannot divide by zero"`; אחרי ה-if, `return a / b`.'),
+        t('If the check says a function returned None, you printed instead of returning.', 'אם הבדיקה אומרת שפונקציה החזירה None, הדפסתם במקום להחזיר.'),
       ],
       check: {
         tests: [
@@ -140,9 +140,9 @@ export const project: Project = {
         ),
       ],
       hints: [
-        ['`operator = input("Operator: ")`, then `first = float(input("First: "))` and `second = float(input("Second: "))`.', '`operator = input("Operator: ")`, אחר כך `first = float(input("First: "))` ו-`second = float(input("Second: "))`.'],
-        ['`if operator == "+": result = add(first, second)` — and an elif for each of the other three operators.', '`if operator == "+": result = add(first, second)` — ו-elif לכל אחד משלושת האופרטורים האחרים.'],
-        ['Finish with `print(result)` after the if / elif chain.', 'סיימו ב-`print(result)` אחרי שרשרת ה-if / elif.'],
+        t('`operator = input("Operator: ")`, then `first = float(input("First: "))` and `second = float(input("Second: "))`.', '`operator = input("Operator: ")`, אחר כך `first = float(input("First: "))` ו-`second = float(input("Second: "))`.'),
+        t('`if operator == "+": result = add(first, second)` — and an elif for each of the other three operators.', '`if operator == "+": result = add(first, second)` — ו-elif לכל אחד משלושת האופרטורים האחרים.'),
+        t('Finish with `print(result)` after the if / elif chain.', 'סיימו ב-`print(result)` אחרי שרשרת ה-if / elif.'),
       ],
       check: {
         tests: [
@@ -210,9 +210,9 @@ export const project: Project = {
         ),
       ],
       hints: [
-        ['Add `else:` after the last `elif`.', 'הוסיפו `else:` אחרי ה-`elif` האחרון.'],
-        ['Inside the else, give result the text: `result = "Unknown operator"`. The print at the end stays as it is.', 'בתוך ה-else, תנו ל-result את הטקסט: `result = "Unknown operator"`. ה-print בסוף נשאר כמו שהוא.'],
-        ['Check the spelling and the capital U: the check looks for exactly Unknown operator.', 'בדקו את האיות ואת ה-U הגדולה: הבדיקה מחפשת בדיוק Unknown operator.'],
+        t('Add `else:` after the last `elif`.', 'הוסיפו `else:` אחרי ה-`elif` האחרון.'),
+        t('Inside the else, give result the text: `result = "Unknown operator"`. The print at the end stays as it is.', 'בתוך ה-else, תנו ל-result את הטקסט: `result = "Unknown operator"`. ה-print בסוף נשאר כמו שהוא.'),
+        t('Check the spelling and the capital U: the check looks for exactly Unknown operator.', 'בדקו את האיות ואת ה-U הגדולה: הבדיקה מחפשת בדיוק Unknown operator.'),
       ],
       check: {
         tests: [
@@ -273,9 +273,9 @@ export const project: Project = {
         code('3.0\n10.0\nGoodbye', { lang: 'text', runnable: false, caption: t('Expected output', 'פלט צפוי') }),
       ],
       hints: [
-        ['Use `while True:` and indent everything that was below the functions into the loop.', 'השתמשו ב-`while True:` והזיחו לתוך הלולאה את כל מה שהיה מתחת לפונקציות.'],
-        ['Right after reading the operator: `if operator == "q": break`. Then read the numbers.', 'מיד אחרי קריאת האופרטור: `if operator == "q": break`. אחר כך קראו את המספרים.'],
-        ['After the loop (not indented) print `Goodbye`.', 'אחרי הלולאה (בלי הזחה) הדפיסו `Goodbye`.'],
+        t('Use `while True:` and indent everything that was below the functions into the loop.', 'השתמשו ב-`while True:` והזיחו לתוך הלולאה את כל מה שהיה מתחת לפונקציות.'),
+        t('Right after reading the operator: `if operator == "q": break`. Then read the numbers.', 'מיד אחרי קריאת האופרטור: `if operator == "q": break`. אחר כך קראו את המספרים.'),
+        t('After the loop (not indented) print `Goodbye`.', 'אחרי הלולאה (בלי הזחה) הדפיסו `Goodbye`.'),
       ],
       check: {
         tests: [
@@ -346,9 +346,9 @@ export const project: Project = {
         code('3.0\n10.0\nCalculations done: 2\nGoodbye', { lang: 'text', runnable: false, caption: t('Expected output', 'פלט צפוי') }),
       ],
       hints: [
-        ['Create `count = 0` before the loop.', 'צרו `count = 0` לפני הלולאה.'],
-        ['After printing the result, add 1 to count — but only if the result is not the text "Unknown operator": `if result != "Unknown operator": count = count + 1`.', 'אחרי הדפסת התוצאה, הוסיפו 1 ל-count — אבל רק אם התוצאה אינה הטקסט "Unknown operator": `if result != "Unknown operator": count = count + 1`.'],
-        ['After the loop: `print(f"Calculations done: {count}")` and then the Goodbye line.', 'אחרי הלולאה: `print(f"Calculations done: {count}")` ואז שורת ה-Goodbye.'],
+        t('Create `count = 0` before the loop.', 'צרו `count = 0` לפני הלולאה.'),
+        t('After printing the result, add 1 to count — but only if the result is not the text "Unknown operator": `if result != "Unknown operator": count = count + 1`.', 'אחרי הדפסת התוצאה, הוסיפו 1 ל-count — אבל רק אם התוצאה אינה הטקסט "Unknown operator": `if result != "Unknown operator": count = count + 1`.'),
+        t('After the loop: `print(f"Calculations done: {count}")` and then the Goodbye line.', 'אחרי הלולאה: `print(f"Calculations done: {count}")` ואז שורת ה-Goodbye.'),
       ],
       check: {
         tests: [
@@ -429,9 +429,9 @@ export const project: Project = {
         ),
       ],
       hints: [
-        ['Write `def main():` under the four functions and indent the whole loop (and the two final prints) into it. `count = 0` goes inside main too.', 'כתבו `def main():` מתחת לארבע הפונקציות והזיחו לתוכה את כל הלולאה (ואת שתי ההדפסות האחרונות). גם `count = 0` נכנס לתוך main.'],
-        ['For calculate: each branch does `return add(first, second)` and so on; the last line of the function is `return "Unknown operator"`.', 'עבור calculate: כל ענף עושה `return add(first, second)` וכן הלאה; השורה האחרונה בפונקציה היא `return "Unknown operator"`.'],
-        ['The very last line of the file, not indented, is `main()`.', 'השורה האחרונה ממש בקובץ, בלי הזחה, היא `main()`.'],
+        t('Write `def main():` under the four functions and indent the whole loop (and the two final prints) into it. `count = 0` goes inside main too.', 'כתבו `def main():` מתחת לארבע הפונקציות והזיחו לתוכה את כל הלולאה (ואת שתי ההדפסות האחרונות). גם `count = 0` נכנס לתוך main.'),
+        t('For calculate: each branch does `return add(first, second)` and so on; the last line of the function is `return "Unknown operator"`.', 'עבור calculate: כל ענף עושה `return add(first, second)` וכן הלאה; השורה האחרונה בפונקציה היא `return "Unknown operator"`.'),
+        t('The very last line of the file, not indented, is `main()`.', 'השורה האחרונה ממש בקובץ, בלי הזחה, היא `main()`.'),
       ],
       check: {
         tests: [
