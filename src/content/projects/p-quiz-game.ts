@@ -92,7 +92,8 @@ export const project: Project = {
           pythonTest(
             py`
               import builtins
-              ask = ns["ask"]
+              ask = ns.get("ask")
+              assert callable(ask), "Define a function called ask(q)."
               q = {"question": "What is 1 + 1?", "answer": "2"}
               results = []
               saved = builtins.input
