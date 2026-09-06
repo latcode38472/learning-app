@@ -1,0 +1,45 @@
+{
+  "name": "codepath-learning-app",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "A bilingual (English/Hebrew) learn-to-program app: from zero to games and AI, with Python running in the browser.",
+  "scripts": {
+    "postinstall": "node scripts/copy-pyodide.mjs",
+    "dev": "node scripts/copy-pyodide.mjs && vite",
+    "build": "node scripts/copy-pyodide.mjs && tsc -p tsconfig.json --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:content": "node scripts/validate-content.mjs",
+    "test:e2e": "playwright test",
+    "tutor-server": "node server/tutor-server.mjs",
+    "check": "npm run typecheck && npm run test && npm run test:content"
+  },
+  "dependencies": {
+    "@codemirror/commands": "^6.8.1",
+    "@codemirror/lang-python": "^6.2.1",
+    "@codemirror/state": "^6.5.2",
+    "@codemirror/view": "^6.38.0",
+    "@uiw/react-codemirror": "^4.25.11",
+    "codemirror": "^6.0.2",
+    "pyodide": "314.0.6",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-router-dom": "^7.9.0",
+    "zustand": "^5.0.8"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^22.18.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^5.1.0",
+    "typescript": "^5.9.0",
+    "vite": "^7.3.0",
+    "vitest": "^3.2.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
