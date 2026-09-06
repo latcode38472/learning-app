@@ -52,7 +52,9 @@ export function CodeEditor({ value, onChange, onRun, readOnly = false, minHeight
         theme={theme === 'dark' ? 'dark' : 'light'}
         readOnly={readOnly}
         minHeight={minHeight}
-        basicSetup={{ foldGutter: false, autocompletion: false, highlightActiveLine: true, tabSize: 4 }}
+        // No auto-closing brackets/quotes: beginners should see exactly what they typed,
+        // including the missing bracket that causes a SyntaxError.
+        basicSetup={{ foldGutter: false, autocompletion: false, closeBrackets: false, highlightActiveLine: true, tabSize: 4 }}
         indentWithTab={false}
       />
     </div>

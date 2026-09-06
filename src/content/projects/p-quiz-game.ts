@@ -82,7 +82,7 @@ export const project: Project = {
               for q in qs:
                   assert isinstance(q, dict), "Every item of questions must be a dictionary."
                   assert "question" in q and "answer" in q, "Every question dictionary needs the keys 'question' and 'answer'."
-                  assert isinstance(q["answer"], str), "Write every answer as a string in quotes, for example \\"4\\"."
+                  assert isinstance(q["answer"], str), "Write every answer as text in quotes, even a number such as 4."
               given = [q["answer"].strip().lower() for q in qs[:3]]
               assert given == ["4", "paris", "7"], "Copy the three given questions exactly (answers 4, Paris and 7, in that order)."
               assert callable(ns.get("ask")), "Define a function called ask(q)."
@@ -119,9 +119,9 @@ export const project: Project = {
         ],
       },
       hints: [
-        ['The list is a list of dictionaries, like the students table in lesson 27. Keep the keys exactly `"question"` and `"answer"`.', 'הרשימה היא רשימה של מילונים, כמו טבלת התלמידים בשיעור 27. שמרו על המפתחות בדיוק `"question"` ו-`"answer"`.'],
-        ['Inside `ask`: `print(q["question"])`, then `answer = input("Your answer: ")`.', 'בתוך `ask`: `print(q["question"])`, ואז `answer = input("Your answer: ")`.'],
-        ['Return the comparison itself: `return answer.strip().lower() == q["answer"].lower()`.', 'החזירו את ההשוואה עצמה: `return answer.strip().lower() == q["answer"].lower()`.'],
+        t('The list is a list of dictionaries, like the students table in lesson 27. Keep the keys exactly `"question"` and `"answer"`.', 'הרשימה היא רשימה של מילונים, כמו טבלת התלמידים בשיעור 27. שמרו על המפתחות בדיוק `"question"` ו-`"answer"`.'),
+        t('Inside `ask`: `print(q["question"])`, then `answer = input("Your answer: ")`.', 'בתוך `ask`: `print(q["question"])`, ואז `answer = input("Your answer: ")`.'),
+        t('Return the comparison itself: `return answer.strip().lower() == q["answer"].lower()`.', 'החזירו את ההשוואה עצמה: `return answer.strip().lower() == q["answer"].lower()`.'),
       ],
       referenceCode: py`
         questions = [
@@ -175,7 +175,7 @@ export const project: Project = {
 
               out, right = play(["4", "Paris", "7"])
               assert out.count("Correct!") == right, "Print Correct! once for every right answer (4, Paris and 7 are all right)."
-              wrong_lines = [l for l in out.split("\\n") if l.strip().startswith("Wrong! The answer is")]
+              wrong_lines = [l for l in out.split("\n") if l.strip().startswith("Wrong! The answer is")]
               assert len(wrong_lines) == len(qs) - right, "Print 'Wrong! The answer is X' once for every wrong answer, and nothing like it for right ones."
               assert "You scored " + str(right) + " out of " + str(len(qs)) in out, "At the end print 'You scored N out of M' (N right answers, M questions)."
 
@@ -194,9 +194,9 @@ export const project: Project = {
         requires: [requires('\\bfor\\b', 'Loop over the questions with a for loop.', 'עברו על השאלות בלולאת for.')],
       },
       hints: [
-        ['`for q in questions:` gives you one dictionary at a time; `if ask(q):` decides which message to print.', '`for q in questions:` נותן לכם מילון אחד בכל פעם; `if ask(q):` מחליט איזו הודעה להדפיס.'],
-        ['Start `correct = 0` before the loop and add 1 inside the `if`.', 'התחילו `correct = 0` לפני הלולאה והוסיפו 1 בתוך ה-`if`.'],
-        ['The wrong message needs the answer from the dictionary: `print("Wrong! The answer is", q["answer"])`. The last line: `print(f"You scored {correct} out of {len(questions)}")`.', 'הודעת הטעות צריכה את התשובה מהמילון: `print("Wrong! The answer is", q["answer"])`. השורה האחרונה: `print(f"You scored {correct} out of {len(questions)}")`.'],
+        t('`for q in questions:` gives you one dictionary at a time; `if ask(q):` decides which message to print.', '`for q in questions:` נותן לכם מילון אחד בכל פעם; `if ask(q):` מחליט איזו הודעה להדפיס.'),
+        t('Start `correct = 0` before the loop and add 1 inside the `if`.', 'התחילו `correct = 0` לפני הלולאה והוסיפו 1 בתוך ה-`if`.'),
+        t('The wrong message needs the answer from the dictionary: `print("Wrong! The answer is", q["answer"])`. The last line: `print(f"You scored {correct} out of {len(questions)}")`.', 'הודעת הטעות צריכה את התשובה מהמילון: `print("Wrong! The answer is", q["answer"])`. השורה האחרונה: `print(f"You scored {correct} out of {len(questions)}")`.'),
       ],
       referenceCode: py`
         questions = [
@@ -260,9 +260,9 @@ export const project: Project = {
         ],
       },
       hints: [
-        ['A function with two parameters and a return value: `def percent(correct, total):`.', 'פונקציה עם שני פרמטרים וערך מוחזר: `def percent(correct, total):`.'],
-        ['`correct / total * 100` gives a float such as 75.0; `int(...)` around it makes 75.', '`correct / total * 100` נותן float כמו 75.0; `int(...)` סביבו נותן 75.'],
-        ['After the loop: `score = percent(correct, len(questions))` and then `print(f"Percent: {score}%")`.', 'אחרי הלולאה: `score = percent(correct, len(questions))` ואז `print(f"Percent: {score}%")`.'],
+        t('A function with two parameters and a return value: `def percent(correct, total):`.', 'פונקציה עם שני פרמטרים וערך מוחזר: `def percent(correct, total):`.'),
+        t('`correct / total * 100` gives a float such as 75.0; `int(...)` around it makes 75.', '`correct / total * 100` נותן float כמו 75.0; `int(...)` סביבו נותן 75.'),
+        t('After the loop: `score = percent(correct, len(questions))` and then `print(f"Percent: {score}%")`.', 'אחרי הלולאה: `score = percent(correct, len(questions))` ואז `print(f"Percent: {score}%")`.'),
       ],
       referenceCode: py`
         questions = [
@@ -334,7 +334,7 @@ export const project: Project = {
               for answers in (all_right, all_right[:2], all_right[:1], []):
                   out, pct = play(answers)
                   expected = verdict(pct)
-                  lines = [l.strip() for l in out.split("\\n")]
+                  lines = [l.strip() for l in out.split("\n")]
                   assert expected in lines, "For a score of " + str(pct) + "% print exactly '" + expected + "' on its own line."
                   for other in ("Excellent", "Good", "Keep practising"):
                       if other != expected:
@@ -345,9 +345,9 @@ export const project: Project = {
         ],
       },
       hints: [
-        ['You already have the percentage in a variable such as `score`. The verdict is a decision about that number.', 'האחוז כבר נמצא אצלכם במשתנה כמו `score`. פסק הדין הוא החלטה על המספר הזה.'],
-        ['`if score >= 80:` … `elif score >= 50:` … `else:` — as in lesson 13, the order of the conditions matters.', '`if score >= 80:` … `elif score >= 50:` … `else:` — כמו בשיעור 13, סדר התנאים חשוב.'],
-        ['Each branch prints exactly one message: `print("Excellent")`, `print("Good")` or `print("Keep practising")`.', 'כל ענף מדפיס בדיוק הודעה אחת: `print("Excellent")`, `print("Good")` או `print("Keep practising")`.'],
+        t('You already have the percentage in a variable such as `score`. The verdict is a decision about that number.', 'האחוז כבר נמצא אצלכם במשתנה כמו `score`. פסק הדין הוא החלטה על המספר הזה.'),
+        t('`if score >= 80:` … `elif score >= 50:` … `else:` — as in lesson 13, the order of the conditions matters.', '`if score >= 80:` … `elif score >= 50:` … `else:` — כמו בשיעור 13, סדר התנאים חשוב.'),
+        t('Each branch prints exactly one message: `print("Excellent")`, `print("Good")` or `print("Keep practising")`.', 'כל ענף מדפיס בדיוק הודעה אחת: `print("Excellent")`, `print("Good")` או `print("Keep practising")`.'),
       ],
       referenceCode: py`
         questions = [
@@ -427,9 +427,9 @@ export const project: Project = {
         ],
       },
       hints: [
-        ['A new question is one more dictionary in the list, for example `{"question": "What colour is a banana?", "answer": "yellow"}`.', 'שאלה חדשה היא עוד מילון אחד ברשימה, למשל `{"question": "What colour is a banana?", "answer": "yellow"}`.'],
-        ['Write `def main():` and indent the whole scoring part — the counter, the loop and the prints — under it.', 'כתבו `def main():` והזיחו את כל חלק הניקוד — המונה, הלולאה וההדפסות — תחתיה.'],
-        ['`main()` can read `questions` because it is a global variable (lesson 23). The very last line of the file is `main()`.', '`main()` יכולה לקרוא את `questions` כי זה משתנה גלובלי (שיעור 23). השורה האחרונה ממש בקובץ היא `main()`.'],
+        t('A new question is one more dictionary in the list, for example `{"question": "What colour is a banana?", "answer": "yellow"}`.', 'שאלה חדשה היא עוד מילון אחד ברשימה, למשל `{"question": "What colour is a banana?", "answer": "yellow"}`.'),
+        t('Write `def main():` and indent the whole scoring part — the counter, the loop and the prints — under it.', 'כתבו `def main():` והזיחו את כל חלק הניקוד — המונה, הלולאה וההדפסות — תחתיה.'),
+        t('`main()` can read `questions` because it is a global variable (lesson 23). The very last line of the file is `main()`.', '`main()` יכולה לקרוא את `questions` כי זה משתנה גלובלי (שיעור 23). השורה האחרונה ממש בקובץ היא `main()`.'),
       ],
       referenceCode: py`
         questions = [

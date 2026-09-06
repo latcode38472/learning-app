@@ -306,7 +306,7 @@ export const test: Assessment = {
           hints: [
             ['Start a counter at 0, loop with `for number in numbers:` and add 1 when the number is even.', 'התחילו מונה מ-0, עברו בלולאה `for number in numbers:` והוסיפו 1 כשהמספר זוגי.'],
             ['`if number % 2 == 0:` is the test for even. Return the counter after the loop, not inside it.', '`if number % 2 == 0:` הוא הבדיקה לזוגיות. החזירו את המונה אחרי הלולאה, לא בתוכה.'],
-            ['`count = 0` / `for number in numbers:` / `if number % 2 == 0: count = count + 1` / `return count`.', '`count = 0` / `for number in numbers:` / `if number % 2 == 0: count = count + 1` / `return count`.'],
+            ['Four lines: `count = 0` / `for number in numbers:` / `if number % 2 == 0: count = count + 1` / `return count`.', 'ארבע שורות: `count = 0` / `for number in numbers:` / `if number % 2 == 0: count = count + 1` / `return count`.'],
           ],
           solution: py`
             def count_even(numbers):
