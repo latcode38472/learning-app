@@ -1,10 +1,10 @@
-import { useI18n } from '@/i18n';
+import { localeTag, useI18n } from '@/i18n';
 import { useStore, currentStreak } from '@/state/store';
 import { ACHIEVEMENTS } from '@/state/achievements';
 import { Badge, useDocumentTitle } from '@/components/ui';
 
 export function AchievementsPage() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const progress = useStore((s) => s.progress);
   useDocumentTitle(t('achievements.title'));
   const streak = currentStreak(progress.activeDays);
@@ -31,7 +31,7 @@ export function AchievementsPage() {
               <p className="small muted" style={{ margin: '0.2rem 0 0.4rem' }}>
                 {t(`achievements.${a.descKey}` as never)}
               </p>
-              <Badge tone={at ? 'success' : 'neutral'}>{at ? `${t('achievements.earned')} · ${new Date(at).toLocaleDateString()}` : t('achievements.locked')}</Badge>
+              <Badge tone={at ? 'success' : 'neutral'}>{at ? `${t('achievements.earned')} · ${new Date(at).toLocaleDateString(localeTag(lang))}` : t('achievements.locked')}</Badge>
             </li>
           );
         })}

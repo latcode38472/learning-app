@@ -110,13 +110,17 @@ function fmt(s: string, params: Record<string, string | number>): string {
   return s.replace(/\{(\w+)\}/g, (m, k) => (k in params ? String(params[k]) : m));
 }
 
+// Hebrew words are matched with letter look-arounds because \b only understands ASCII word characters.
 const INTENT_PATTERNS: Array<[Intent, RegExp]> = [
-  ['solution', /\b(solution|answer|write it|do it for me|give me the code)\b|פתרון|תשובה|תכתוב|תכתבי|כתוב לי|תן לי את הקוד/i],
-  ['error', /\b(error|traceback|exception|crash|red)\b|שגיאה|קרס|אדום/i],
-  ['fail', /\b(fail|failed|check|test|expected|wrong output)\b|נכשל|בדיקה|מצופה|פלט/i],
-  ['hint', /\b(hint|nudge|clue|tip)\b|רמז|דחיפה|טיפ/i],
-  ['stuck', /\b(stuck|help|lost|confused|don'?t know|do not know)\b|נתקע|עזרה|אבוד|מבולבל|לא יודע/i],
+  ['solution', /\b(solution|write it for me|do it for me|give me the code|full code)\b|(?<!\p{L})(פתרון|תכתוב|תכתבי|כתוב לי|כתבו לי|תן לי את הקוד|תנו לי את הקוד)(?!\p{L})/iu],
+  ['error', /\b(error|traceback|exception|crash|crashed|crashes)\b|(?<!\p{L})(שגיאה|השגיאה|קרס|קרסה|נעצרה)(?!\p{L})/iu],
+  ['fail', /\b(fail|failed|failing|check|checks|test|tests|expected|wrong output)\b|(?<!\p{L})(נכשל|נכשלה|נכשלו|בדיקה|הבדיקה|הבדיקות|מצופה)(?!\p{L})/iu],
+  ['hint', /\b(hint|nudge|clue)\b|(?<!\p{L})(רמז|דחיפה)(?!\p{L})/iu],
+  ['stuck', /\b(stuck|help|lost|confused|don'?t know|do not know)\b|(?<!\p{L})(נתקעתי|נתקע|נתקעה|עזרה|אבוד|אבודה|מבולבל|מבולבלת|לא יודע|לא יודעת)(?!\p{L})/iu],
 ];
+
+/** "What is X?" style questions are answered from the glossary before intent keywords are considered. */
+const DEFINITION_QUESTION = /^\s*(what is|what's|what are|what does|explain|define|מה זה|מה זאת|מהו|מהי|מה הם|מה הן|מה עושה|תסביר|תסבירי|הסבירו|הסבר)(?!\p{L})/iu;
 
 function detectIntent(message: string): Intent {
   for (const [intent, re] of INTENT_PATTERNS) if (re.test(message)) return intent;
@@ -129,14 +133,37 @@ function normalizeLines(s: string): string[] {
   return lines;
 }
 
+/** Glossary names may carry the English original in parentheses: "משתנה (variable)". */
+function nameVariants(name: string): string[] {
+  const lower = name.toLowerCase().trim();
+  const out = new Set<string>([lower]);
+  const stripped = lower.replace(/\s*\([^)]*\)\s*$/, '').trim();
+  if (stripped) out.add(stripped);
+  const paren = lower.match(/\(([^)]+)\)\s*$/);
+  if (paren) out.add(paren[1].trim());
+  for (const v of [...out]) {
+    const noCall = v.replace(/\(\)$/, '').trim();
+    if (noCall) out.add(noCall);
+    if (v.startsWith('.')) out.add(v.slice(1));
+  }
+  return [...out].filter((v) => v.length >= 2);
+}
+
 function findTerm(message: string, lang: LangCode) {
-  const lower = message.toLowerCase();
-  // Longest matching term first so "for loop" beats "for".
-  const candidates = glossary
-    .map((g) => ({ g, names: [g.term.toLowerCase(), (localize(g.name, lang) || '').toLowerCase(), (g.name.en || '').toLowerCase()].filter(Boolean) }))
-    .flatMap(({ g, names }) => names.map((n) => ({ g, n })))
-    .filter(({ n }) => n.length >= 2 && (lower.includes(` ${n} `) || lower.includes(`${n}?`) || lower === n || lower.endsWith(` ${n}`) || lower.startsWith(`${n} `) || lower.includes(`\`${n}\``) || lower.includes(`'${n}'`) || lower.includes(`"${n}"`)))
-    .sort((a, b) => b.n.length - a.n.length);
+  // Pad with spaces and neutralise punctuation so whole-word matching works for Hebrew and English alike.
+  const text = ' ' + message.toLowerCase().replace(/[?!,.:;"'`،؟]+/g, ' ').replace(/\s+/g, ' ') + ' ';
+  const candidates: Array<{ g: (typeof glossary)[number]; n: string }> = [];
+  for (const g of glossary) {
+    const names = new Set<string>();
+    for (const raw of [g.term, localize(g.name, lang) || '', g.name.en || '', g.name.he || '']) {
+      if (raw) for (const v of nameVariants(raw)) names.add(v);
+    }
+    for (const n of names) {
+      if (text.includes(` ${n} `)) candidates.push({ g, n });
+    }
+  }
+  // Longest matching name first so "for loop" beats "for".
+  candidates.sort((a, b) => b.n.length - a.n.length);
   return candidates[0]?.g;
 }
 
@@ -145,8 +172,9 @@ export function offlineReply(message: string, situation: TutorSituation, lang: L
   if (situation.examMode) return S.exam;
 
   let intent = forcedIntent ?? detectIntent(message);
-  const term = forcedIntent === 'term' || intent === 'chat' ? findTerm(message, lang) : undefined;
-  if (term) intent = 'term';
+  const isDefinition = DEFINITION_QUESTION.test(message);
+  const term = forcedIntent === 'term' || isDefinition || intent === 'chat' ? findTerm(message, lang) : undefined;
+  if (term && (forcedIntent === 'term' || isDefinition || intent === 'chat')) intent = 'term';
 
   switch (intent) {
     case 'term': {
@@ -208,7 +236,7 @@ export function offlineReply(message: string, situation: TutorSituation, lang: L
       return S.solution;
     default: {
       const lesson = situation.lessonId ? lessons[situation.lessonId] : undefined;
-      if (/^(hi|hello|hey|שלום|היי)\b/i.test(message.trim()) || message.trim() === '') {
+      if (/^(hi|hello|hey|שלום|היי)(?!\p{L})/iu.test(message.trim()) || message.trim() === '') {
         return lesson ? fmt(S.greeting, { lesson: localize(lesson.title, lang) }) : S.greetingNoLesson;
       }
       const learned = situation.learnedConcepts

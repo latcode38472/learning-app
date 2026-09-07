@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import type { Assessment, Question } from '@/content/schema';
 import { assessments, conceptToLesson, lessons, moduleById, modules } from '@/content';
-import { useI18n } from '@/i18n';
+import { hasMissingTranslation, localeTag, useI18n } from '@/i18n';
+import { languageInfo } from '@/i18n/languages';
 import { useStore } from '@/state/store';
 import { allLessonsDone, canTakeModuleTest, isModuleCompleted } from '@/state/unlock';
 import { setTutorContext } from '@/tutor/context';
@@ -24,7 +25,8 @@ export function AssessmentPage() {
 }
 
 function AssessmentView({ assessment }: { assessment: Assessment }) {
-  const { t, l } = useI18n();
+  const { t, l, lang } = useI18n();
+  const fellBack = useMemo(() => hasMissingTranslation(assessment, lang), [assessment, lang]);
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const fromPlacement = params.get('from') === 'placement';
@@ -187,6 +189,7 @@ function AssessmentView({ assessment }: { assessment: Assessment }) {
       <Notice tone="info" title={t('quiz.examMode')}>
         {t('quiz.examModeNote', { hints: assessment.hintsAllowed })}
       </Notice>
+      {fellBack && <Notice tone="warning">{t('lesson.fallbackNotice', { language: languageInfo(lang).nativeName })}</Notice>}
       {!allowed && <Notice tone="warning">{t('placement.lockedUntil')}</Notice>}
       <div className="btn-row">
         <button type="button" className="btn btn-primary btn-lg" onClick={start} disabled={!allowed} data-testid="assessment-start">
@@ -206,7 +209,7 @@ function AssessmentView({ assessment }: { assessment: Assessment }) {
               .slice(0, 5)
               .map((a, i) => (
                 <li key={i}>
-                  {new Date(a.at).toLocaleString()} — {t('quiz.score', { score: Math.round(a.score * 100) })} — {a.passed ? t('quiz.passed') : t('quiz.failed')}
+                  {new Date(a.at).toLocaleString(localeTag(lang))} — {t('quiz.score', { score: Math.round(a.score * 100) })} — {a.passed ? t('quiz.passed') : t('quiz.failed')}
                 </li>
               ))}
           </ul>

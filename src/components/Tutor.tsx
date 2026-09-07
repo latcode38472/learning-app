@@ -109,7 +109,7 @@ export function Tutor() {
               ✕
             </button>
           </div>
-          <div className="tutor-messages" ref={listRef}>
+          <div className="tutor-messages" ref={listRef} aria-live="polite" aria-relevant="additions">
             <div className="msg msg-tutor">
               <p>{situation.examMode ? t('tutor.examDisabled') : remote ? t('tutor.introAi') : t('tutor.intro')}</p>
               {remote && <p className="tiny muted">{t('tutor.costNotice')}</p>}

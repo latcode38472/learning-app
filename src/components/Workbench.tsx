@@ -181,7 +181,9 @@ export function Workbench({
       <div className="console-toolbar">
         <span>{t('editor.console')}</span>
         <span className="spacer" style={{ flex: 1 }} />
-        <span className="tiny">{t('editor.shortcut')}</span>
+        <span className="tiny">
+          {t('editor.shortcut')} · {t('editor.tabHint')}
+        </span>
       </div>
       <div className="console" ref={consoleRef} data-testid={`${testIdPrefix}-console`} aria-live="polite">
         {!result && <span className="console-empty">{t('editor.consoleEmpty')}</span>}

@@ -50,7 +50,8 @@ export function localizeWithInfo<T>(value: Localized<T> | T, lang: LangCode): Lo
   if (value !== null && typeof value === 'object' && 'en' in (value as object)) {
     const loc = value as Localized<T>;
     const chosen = loc[lang];
-    if (chosen !== undefined && chosen !== null && chosen !== '') return { value: chosen as T, fellBack: false };
+    const present = typeof chosen === 'string' ? chosen.trim() !== '' : chosen !== undefined && chosen !== null;
+    if (present) return { value: chosen as T, fellBack: false };
     return { value: loc.en, fellBack: lang !== 'en' };
   }
   return { value: value as T, fellBack: false };

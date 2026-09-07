@@ -67,7 +67,7 @@ export function AppShell() {
           <button type="button" className="btn btn-sm menu-button" onClick={() => setMenuOpen((o) => !o)} aria-expanded={menuOpen} aria-controls="main-nav">
             ☰ {t('nav.menu')}
           </button>
-          <nav id="main-nav" className={`nav${menuOpen ? ' open' : ''}`} aria-label="Main">
+          <nav id="main-nav" className={`nav${menuOpen ? ' open' : ''}`} aria-label={t('nav.main')}>
             {links.map(([to, label]) => (
               <NavLink key={to} to={to} end={to === '/'} className={({ isActive }) => (isActive ? 'active' : '')}>
                 {label}

@@ -126,7 +126,7 @@ function CodeBlock({ block }: { block: Extract<Block, { kind: 'code' }> }) {
     <>
       <div className="code-block">
         <div className="code-block-header">
-          <span>{isPython ? 'Python' : 'text'}</span>
+          <span>{isPython ? 'Python' : t('editor.plainText')}</span>
           <span className="spacer" />
           {runnable && (
             <button type="button" className="btn btn-ghost btn-sm" onClick={run} disabled={running}>
@@ -148,7 +148,7 @@ function CodeBlock({ block }: { block: Extract<Block, { kind: 'code' }> }) {
             <div className="output-label">{t('editor.console')}</div>
             {result.stdout}
             {result.error && (
-              <div style={{ color: 'var(--danger)', fontFamily: 'var(--font-sans)', direction: lang === 'he' ? 'rtl' : 'ltr', marginTop: '0.3rem' }}>
+              <div className="ui-text" style={{ color: 'var(--danger)', marginTop: '0.3rem' }}>
                 {result.error.type}: {explainError(result.error, lang).explanation}
               </div>
             )}

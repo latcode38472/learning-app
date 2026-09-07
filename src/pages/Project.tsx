@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import type { Project, ProjectStep } from '@/content/schema';
 import { lessons, moduleById, projects } from '@/content';
-import { useI18n } from '@/i18n';
+import { hasMissingTranslation, localeTag, useI18n } from '@/i18n';
+import { languageInfo } from '@/i18n/languages';
 import { runtime, type GradeResult } from '@/runtime/runner';
 import { useStore } from '@/state/store';
 import { isProjectUnlocked, missingProjectPrerequisites } from '@/state/unlock';
@@ -22,7 +23,8 @@ export function ProjectPage() {
 }
 
 function ProjectView({ project }: { project: Project }) {
-  const { t, l } = useI18n();
+  const { t, l, lang } = useI18n();
+  const fellBack = useMemo(() => hasMissingTranslation(project, lang), [project, lang]);
   const progress = useStore((s) => s.progress);
   const saveProjectCode = useStore((s) => s.saveProjectCode);
   const markProjectStep = useStore((s) => s.markProjectStep);
@@ -115,6 +117,7 @@ function ProjectView({ project }: { project: Project }) {
         <h1>{l(project.title)}</h1>
         <p className="muted">{l(project.tagline)}</p>
         <Blocks blocks={project.description} />
+        {fellBack && <Notice tone="warning">{t('lesson.fallbackNotice', { language: languageInfo(lang).nativeName })}</Notice>}
         <div className="pill-row">
           <Badge>{t('projects.steps', { count: project.steps.length })}</Badge>
           <Badge>{t('curriculum.minutes', { count: project.estimatedMinutes })}</Badge>
@@ -238,7 +241,7 @@ function ProjectView({ project }: { project: Project }) {
             ))}
           </ol>
           <hr />
-          <div className="small muted">{pp?.updatedAt ? `${t('projects.lastSaved')}: ${new Date(pp.updatedAt).toLocaleTimeString()}` : ''}</div>
+          <div className="small muted">{pp?.updatedAt ? `${t('projects.lastSaved')}: ${new Date(pp.updatedAt).toLocaleTimeString(localeTag(lang))}` : ''}</div>
           <button type="button" className="btn btn-ghost btn-sm" onClick={reset} style={{ marginTop: '0.5rem' }}>
             {t('projects.resetProject')}
           </button>

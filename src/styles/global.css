@@ -16,9 +16,9 @@
   --surface-3: #e3e7f0;
   --text: #1a1f2e;
   --text-2: #4a5268;
-  --text-3: #6b7387;
+  --text-3: #5b6379;
   --border: #d8dce8;
-  --border-strong: #b8bfd0;
+  --border-strong: #8a93a8;
   --primary: #2f5fd9;
   --primary-strong: #234bb3;
   --primary-soft: #e4ebfc;
@@ -37,9 +37,10 @@
   --code-border: #d8dce8;
   --console-bg: #14161f;
   --console-text: #e6e8ef;
-  --focus: #ff9e2c;
+  --focus: #b45f06;
   --shadow: 0 1px 2px rgba(20, 24, 40, 0.06), 0 4px 16px rgba(20, 24, 40, 0.06);
   --transition: 160ms ease;
+  --ui-dir: ltr;
 }
 
 [data-theme='dark'] {
@@ -49,9 +50,10 @@
   --surface-3: #2a2f40;
   --text: #eceef5;
   --text-2: #b9bfd2;
-  --text-3: #8d94ab;
+  --text-3: #979eb5;
   --border: #2d3245;
-  --border-strong: #454c63;
+  --border-strong: #7f889e;
+  --focus: #ff9e2c;
   --primary: #7ea2ff;
   --primary-strong: #a5bdff;
   --primary-soft: #1d2a4d;
@@ -76,10 +78,10 @@
 [data-style='playful'] {
   --radius: 16px;
   --radius-lg: 22px;
-  --primary: #0f8b8d;
-  --primary-strong: #0b6e70;
+  --primary: #0d7476;
+  --primary-strong: #0a5c5e;
   --primary-soft: #dcf3f3;
-  --accent: #d1495b;
+  --accent: #b8364a;
   --accent-soft: #fbe3e7;
   --base-size: 17px;
 }
@@ -805,9 +807,12 @@ table.lesson-table th {
   line-height: 1.5;
 }
 .console .console-empty {
-  color: #8b93a7;
+  color: #b3b9c9;
   font-family: var(--font-sans);
-  direction: inherit;
+  direction: var(--ui-dir, ltr);
+  text-align: start;
+  unicode-bidi: isolate;
+  display: block;
 }
 .console-toolbar {
   display: flex;
@@ -946,9 +951,17 @@ table.lesson-table th {
   color: var(--text-3);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  direction: inherit;
+  direction: var(--ui-dir, ltr);
+  text-align: start;
+  unicode-bidi: isolate;
   display: block;
   margin-bottom: 0.15rem;
+}
+.ui-text {
+  direction: var(--ui-dir, ltr);
+  text-align: start;
+  unicode-bidi: isolate;
+  font-family: var(--font-sans);
 }
 .hint-box {
   background: var(--warning-soft);
@@ -1232,6 +1245,9 @@ table.lesson-table th {
 .module-state.done {
   background: var(--success);
   color: #fff;
+}
+[data-theme='dark'] .module-state.done {
+  color: #062a14;
 }
 .module-state.active {
   background: var(--primary);

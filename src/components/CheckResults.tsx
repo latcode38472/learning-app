@@ -62,11 +62,14 @@ export function CheckResults({ result }: { result: GradeResult }) {
 
 function FailureDetails({ r, lang }: { r: CheckResult; lang: 'en' | 'he' }) {
   const { t, l } = useI18n();
+  // Messages produced by assert statements inside check scripts exist only in English.
+  const englishOnly = typeof r.message === 'string' && lang !== 'en' ? <span className="badge" style={{ marginInlineStart: '0.4rem' }}>{t('exercise.englishOnly')}</span> : null;
   if (r.kind !== 'test') {
     const msg = typeof r.message === 'string' ? r.message : r.message ? l(r.message) : '';
     return (
       <p className="small" style={{ margin: '0.3rem 0 0' }}>
         <Inline text={msg} />
+        {englishOnly}
       </p>
     );
   }
@@ -127,6 +130,7 @@ function FailureDetails({ r, lang }: { r: CheckResult; lang: 'en' | 'he' }) {
   return (
     <p className="small" style={{ margin: '0.3rem 0 0' }}>
       <Inline text={msg} />
+      {englishOnly}
     </p>
   );
 }

@@ -16,7 +16,14 @@ interface Props {
   ariaLabel?: string;
 }
 
-/** Python editor. Always left-to-right, regardless of UI language. */
+/**
+ * Python editor. Always left-to-right, regardless of UI language.
+ *
+ * Tab indents (beginners need it for Python blocks). To keep keyboard users
+ * out of a trap, Escape switches the editor to "tab focus mode" for a few
+ * seconds, during which Tab moves focus instead of indenting; the hint below
+ * the editor explains this.
+ */
 export function CodeEditor({ value, onChange, onRun, readOnly = false, minHeight = '160px', ariaLabel }: Props) {
   const { t } = useI18n();
   const theme = useResolvedTheme();
@@ -37,6 +44,13 @@ export function CodeEditor({ value, onChange, onRun, readOnly = false, minHeight
               return true;
             },
           },
+          {
+            key: 'Escape',
+            run: (view) => {
+              view.setTabFocusMode(3000);
+              return false;
+            },
+          },
         ]),
       ),
       EditorView.contentAttributes.of({ 'aria-label': ariaLabel ?? t('editor.editorLabel'), dir: 'ltr' }),
@@ -52,8 +66,6 @@ export function CodeEditor({ value, onChange, onRun, readOnly = false, minHeight
         theme={theme === 'dark' ? 'dark' : 'light'}
         readOnly={readOnly}
         minHeight={minHeight}
-        // No auto-closing brackets/quotes: beginners should see exactly what they typed,
-        // including the missing bracket that causes a SyntaxError.
         basicSetup={{ foldGutter: false, autocompletion: false, closeBrackets: false, highlightActiveLine: true, tabSize: 4 }}
         indentWithTab={false}
       />

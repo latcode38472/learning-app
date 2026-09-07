@@ -24,6 +24,7 @@ export const he: Dict<typeof en> = {
     continueLocally: 'המשך במחשב שלכם',
     menu: 'תפריט',
     close: 'סגירה',
+    main: 'ניווט ראשי',
   },
   onboarding: {
     welcome: 'ברוכים הבאים ל-CodePath',
@@ -148,6 +149,7 @@ export const he: Dict<typeof en> = {
     fallbackNotice: 'חלקים מהשיעור הזה עדיין לא זמינים ב{language} ומוצגים באנגלית.',
     section: 'חלק {n} מתוך 8',
     sections: 'חלקי השיעור',
+    navigation: 'השיעור הקודם והבא',
     lockedTitle: 'השיעור הזה נעול',
     lockedBody: 'סיימו קודם את השיעור הקודם: {lesson}.',
     goToLesson: 'לשיעור ההוא',
@@ -184,7 +186,10 @@ export const he: Dict<typeof en> = {
     copy: 'העתקת הקוד',
     copied: 'הועתק',
     shortcut: 'Ctrl+Enter מריץ את הקוד',
+    tabHint: 'Tab מזיח; לחצו Escape ואז Tab כדי לצאת מהעורך',
     editorLabel: 'עורך קוד',
+    codeLabel: 'קוד התוכנית',
+    plainText: 'טקסט',
     lineNumbers: 'שורה {n}',
   },
   exercise: {
@@ -221,6 +226,7 @@ export const he: Dict<typeof en> = {
     diffWhitespace: 'הטקסט זהה חוץ מרווחים או שורות ריקות.',
     diffLines: 'בפלט שלכם יש {actual} שורות; היו צפויות {expected} שורות.',
     error: 'התוכנית נעצרה בגלל שגיאה.',
+    englishOnly: 'מוצג באנגלית',
   },
   quiz: {
     question: 'שאלה {n} מתוך {total}',

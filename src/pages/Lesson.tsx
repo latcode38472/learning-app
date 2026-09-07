@@ -23,7 +23,7 @@ export function LessonPage() {
 }
 
 function LessonView({ lesson }: { lesson: Lesson }) {
-  const { t, l, lang } = useI18n();
+  const { t, l, lang, dir } = useI18n();
   const progress = useStore((s) => s.progress);
   const pace = useStore((s) => s.settings.pace);
   const startLesson = useStore((s) => s.startLesson);
@@ -289,10 +289,10 @@ function LessonView({ lesson }: { lesson: Lesson }) {
           )}
         </section>
 
-        <nav className="lesson-nav" aria-label="Lesson navigation">
+        <nav className="lesson-nav" aria-label={t('lesson.navigation')}>
           {prevId ? (
             <Link to={`/lesson/${prevId}`} className="btn">
-              ← {t('lesson.previousLesson')}
+              {dir === 'rtl' ? '→' : '←'} {t('lesson.previousLesson')}
             </Link>
           ) : (
             <span />
@@ -300,11 +300,11 @@ function LessonView({ lesson }: { lesson: Lesson }) {
           {nextId &&
             (isLessonUnlocked(nextId, progress) ? (
               <Link to={`/lesson/${nextId}`} className={`btn${completed ? ' btn-primary' : ''}`}>
-                {t('lesson.nextLesson')} →
+                {t('lesson.nextLesson')} {dir === 'rtl' ? '←' : '→'}
               </Link>
             ) : (
               <button type="button" className="btn" disabled title={t('lesson.completeRequirements')}>
-                {t('lesson.nextLesson')} →
+                {t('lesson.nextLesson')} {dir === 'rtl' ? '←' : '→'}
               </button>
             ))}
         </nav>

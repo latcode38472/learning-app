@@ -23,6 +23,7 @@ export const en = {
     continueLocally: 'Continue locally',
     menu: 'Menu',
     close: 'Close',
+    main: 'Main navigation',
   },
   onboarding: {
     welcome: 'Welcome to CodePath',
@@ -147,6 +148,7 @@ export const en = {
     fallbackNotice: 'Parts of this lesson are not available in {language} yet and are shown in English.',
     section: 'Section {n} of 8',
     sections: 'Lesson sections',
+    navigation: 'Previous and next lesson',
     lockedTitle: 'This lesson is locked',
     lockedBody: 'Finish the previous lesson first: {lesson}.',
     goToLesson: 'Go to that lesson',
@@ -183,7 +185,10 @@ export const en = {
     copy: 'Copy code',
     copied: 'Copied',
     shortcut: 'Ctrl+Enter runs the code',
+    tabHint: 'Tab indents; press Escape, then Tab, to leave the editor',
     editorLabel: 'Code editor',
+    codeLabel: 'Program code',
+    plainText: 'text',
     lineNumbers: 'Line {n}',
   },
   exercise: {
@@ -220,6 +225,7 @@ export const en = {
     diffWhitespace: 'The text matches except for spaces or blank lines.',
     diffLines: 'Your output has {actual} lines; {expected} lines were expected.',
     error: 'The program stopped with an error.',
+    englishOnly: 'Shown in English',
   },
   quiz: {
     question: 'Question {n} of {total}',

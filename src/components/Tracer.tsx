@@ -68,7 +68,7 @@ function fmt(s: string, params: Record<string, string | number>) {
 }
 
 export function Tracer({ code, stdin = [], caption, autoRun = false }: Props) {
-  const { lang } = useI18n();
+  const { lang, dir, t } = useI18n();
   const L = LABELS[lang] ?? LABELS.en;
   const [trace, setTrace] = useState<TraceResult | null>(null);
   const [loading, setLoading] = useState(false);
@@ -116,7 +116,7 @@ export function Tracer({ code, stdin = [], caption, autoRun = false }: Props) {
 
   return (
     <div className="tracer" dir="ltr">
-      <div className="workbench-toolbar" dir={lang === 'he' ? 'rtl' : 'ltr'}>
+      <div className="workbench-toolbar" dir={dir}>
         {!trace && (
           <button type="button" className="btn btn-primary btn-sm" onClick={start} disabled={loading}>
             {loading ? L.loading : L.run}
@@ -151,7 +151,7 @@ export function Tracer({ code, stdin = [], caption, autoRun = false }: Props) {
         {caption && <span className="small muted">{caption}</span>}
       </div>
       <div className="tracer-body">
-        <pre className="tracer-code" aria-label="code">
+        <pre className="tracer-code" role="region" aria-label={t('editor.codeLabel')}>
           {lines.map((ln, i) => (
             <span key={i} className={`line${i + 1 === activeLine ? ' active' : ''}`}>
               <span className="ln">{i + 1}</span>
@@ -159,7 +159,7 @@ export function Tracer({ code, stdin = [], caption, autoRun = false }: Props) {
             </span>
           ))}
         </pre>
-        <div className="tracer-side" dir={lang === 'he' ? 'rtl' : 'ltr'}>
+        <div className="tracer-side" dir={dir}>
           {trace && trace.needInput !== null && <Notice tone="warning">{L.needInput}</Notice>}
           {step && (
             <>

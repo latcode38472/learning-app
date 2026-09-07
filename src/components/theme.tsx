@@ -36,5 +36,7 @@ export function useApplyDocumentSettings() {
     root.dataset.contrast = settings.highContrast ? 'high' : 'normal';
     root.dataset.motion = settings.reduceMotion ? 'reduce' : 'normal';
     root.style.colorScheme = resolved;
+    // Used by CSS for prose that sits inside left-to-right code regions.
+    root.style.setProperty('--ui-dir', info.dir);
   }, [settings, resolved]);
 }

@@ -10,6 +10,7 @@ import { useI18n } from '@/i18n';
 const TOKEN = /(\*\*[^*]+\*\*|`[^`]+`|\{\{[a-z0-9-]+\}\}|\[\[[^\]]+\]\])/g;
 
 export function Inline({ text, noTerms = false }: { text: string; noTerms?: boolean }) {
+  const { l } = useI18n();
   const parts = text.split(TOKEN);
   return (
     <>
@@ -27,7 +28,7 @@ export function Inline({ text, noTerms = false }: { text: string; noTerms?: bool
           const lesson = lessons[target];
           return (
             <Link key={i} to={`/lesson/${target}`}>
-              {label ?? (lesson ? lesson.title.en : target)}
+              {label ?? (lesson ? l(lesson.title) : target)}
             </Link>
           );
         }
