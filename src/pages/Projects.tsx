@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { allProjects, lessons, moduleById } from '@/content';
 import { useI18n } from '@/i18n';
 import { useStore } from '@/state/store';
-import { isProjectUnlocked } from '@/state/unlock';
+import { isProjectUnlocked, missingProjectPrerequisites } from '@/state/unlock';
 import { Badge, ProgressBar, useDocumentTitle } from '@/components/ui';
 
 export function ProjectsPage() {
@@ -20,7 +20,7 @@ export function ProjectsPage() {
           const unlocked = isProjectUnlocked(p, progress);
           const pp = progress.projects[p.id];
           const done = pp?.stepsDone.length ?? 0;
-          const missing = p.prerequisites.filter((id) => progress.lessons[id]?.status !== 'completed').map((id) => lessons[id]).filter(Boolean);
+          const missing = missingProjectPrerequisites(p, progress).map((id) => lessons[id]).filter(Boolean);
           return (
             <section key={p.id} className="card stack-sm" data-testid={`project-card-${p.id}`}>
               <div className="small muted">{l(moduleById[p.moduleId]?.title ?? { en: p.moduleId })}</div>

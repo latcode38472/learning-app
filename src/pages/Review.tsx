@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { Question } from '@/content/schema';
-import { assessments, conceptToLesson, glossaryById, lessonOrder, lessons, moduleById } from '@/content';
+import { assessments, conceptToLesson, glossaryById, lessonOrder, lessons } from '@/content';
 import { useI18n } from '@/i18n';
 import { useStore } from '@/state/store';
-import { daysUntil, isDue, isWeak } from '@/state/review';
+import { daysUntil, isWeak } from '@/state/review';
+import { dueConceptIds, isLessonLearned } from '@/state/unlock';
 import { QuizRunner, type QuizAnswer } from '@/components/QuizRunner';
 import { Notice, useDocumentTitle } from '@/components/ui';
 
@@ -51,24 +52,22 @@ export function ReviewPage() {
   const [running, setRunning] = useState(false);
   const [finished, setFinished] = useState<QuizAnswer[] | null>(null);
 
-  const due = useMemo(() => new Set(Object.entries(progress.concepts).filter(([, s]) => isDue(s)).map(([id]) => id)), [progress.concepts]);
-  // Lessons that count as "learned": completed ones, plus every lesson of a module the learner tested out of.
-  const completedLessons = useMemo(() => {
-    const done = new Set(Object.entries(progress.lessons).filter(([, lp]) => lp.status === 'completed').map(([id]) => id));
-    for (const mid of progress.testedOut) for (const id of moduleById[mid]?.lessonIds ?? []) done.add(id);
-    return done;
-  }, [progress.lessons, progress.testedOut]);
+  // Only concepts from lessons the learner has actually learned (completed, or module tested out) are reviewable.
+  const due = useMemo(() => new Set(dueConceptIds(progress)), [progress]);
+  const completedLessons = useMemo(() => new Set(lessonOrder.filter((id) => isLessonLearned(id, progress))), [progress]);
   const [questions, setQuestions] = useState<Question[]>([]);
-  const weak = Object.entries(progress.concepts).filter(([, s]) => isWeak(s));
-  const nextDue = Object.values(progress.concepts)
-    .map((s) => daysUntil(s.nextReview))
+  const weak = Object.entries(progress.concepts).filter(([id, s]) => isWeak(s) && conceptToLesson[id] && isLessonLearned(conceptToLesson[id], progress));
+  const nextDue = Object.entries(progress.concepts)
+    .filter(([id]) => conceptToLesson[id] && isLessonLearned(conceptToLesson[id], progress))
+    .map(([, s]) => daysUntil(s.nextReview))
     .filter((d) => d > 0)
     .sort((a, b) => a - b)[0];
 
   const start = () => {
-    setQuestions(buildReviewQuestions(due, completedLessons));
+    const qs = buildReviewQuestions(due, completedLessons);
+    setQuestions(qs);
     setFinished(null);
-    setRunning(true);
+    setRunning(qs.length > 0);
   };
 
   return (

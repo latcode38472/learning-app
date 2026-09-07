@@ -1,6 +1,18 @@
 import { describe, expect, it } from 'vitest';
 import { emptyProgress, currentStreak, todayKey, type Progress } from './store';
-import { isLessonUnlocked, isModuleUnlocked, isModuleCompleted, moduleState, nextRecommendedLesson, canTakeModuleTest, lessonBlockedBy } from './unlock';
+import {
+  isLessonUnlocked,
+  isModuleUnlocked,
+  isModuleCompleted,
+  moduleState,
+  nextRecommendedLesson,
+  canTakeModuleTest,
+  lessonBlockedBy,
+  stage1Summary,
+  isProjectUnlocked,
+  missingProjectPrerequisites,
+  dueConceptIds,
+} from './unlock';
 import { scheduleAfterAnswer, initialConceptStats, isDue, isWeak } from './review';
 import { modules, lessons, lessonOrder, conceptMap, conceptToLesson, conceptsKnownAt, assessments, projects } from '@/content';
 import { en } from '@/i18n/en';
@@ -54,6 +66,29 @@ describe('unlock logic', () => {
     expect(moduleState('m1', p)).toBe('tested-out');
     expect(isLessonUnlocked(m1.lessonIds[3], p)).toBe(true);
     expect(isModuleUnlocked('m2', p)).toBe(true);
+    // The recommendation skips the tested-out module and progress counts its lessons as learned.
+    expect(nextRecommendedLesson(p)).toBe(m2.lessonIds[0]);
+    expect(stage1Summary(p).done).toBe(m1.lessonIds.length);
+  });
+
+  it('project prerequisites are satisfied by tested-out modules', () => {
+    const adventure = projects['p-text-adventure'];
+    const p = emptyProgress();
+    p.testedOut = ['m5', 'm6'];
+    for (const id of modules.find((m) => m.id === 'm7')!.lessonIds) p.lessons[id] = { status: 'completed', startedAt: 'x', completedAt: 'x' };
+    expect(isProjectUnlocked(adventure, p)).toBe(true);
+    expect(missingProjectPrerequisites(adventure, p)).toEqual([]);
+    const q = emptyProgress();
+    expect(isProjectUnlocked(adventure, q)).toBe(false);
+    expect(missingProjectPrerequisites(adventure, q).length).toBeGreaterThan(0);
+  });
+
+  it('only counts due concepts from learned lessons', () => {
+    const p = emptyProgress();
+    p.concepts['variable'] = { ...initialConceptStats(new Date('2020-01-01')), nextReview: '2020-01-02T00:00:00Z' };
+    expect(dueConceptIds(p)).toEqual([]);
+    p.testedOut = ['m1', 'm2'];
+    expect(dueConceptIds(p)).toEqual(['variable']);
   });
 
   it('never unlocks planned modules', () => {

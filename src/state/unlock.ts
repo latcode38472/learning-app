@@ -13,8 +13,9 @@
  *    module is tested out).
  */
 import type { Module, Project, Stage } from '@/content/schema';
-import { lessons, moduleById, modules, stageById, lessonOrder } from '@/content';
+import { conceptToLesson, lessons, moduleById, modules, stageById, lessonOrder } from '@/content';
 import type { Progress } from './store';
+import { isDue } from './review';
 
 export type ModuleState = 'planned' | 'locked' | 'available' | 'in-progress' | 'completed' | 'tested-out';
 
@@ -108,7 +109,13 @@ export function allLessonsDone(moduleId: string, progress: Progress): boolean {
 
 export function isProjectUnlocked(project: Project, progress: Progress): boolean {
   if (isTestedOut(project.moduleId, progress)) return true;
-  return project.prerequisites.every((id) => isLessonCompleted(id, progress));
+  return project.prerequisites.every((id) => isLessonLearned(id, progress));
+}
+
+/** Prerequisite lessons of a project that are not learned yet. */
+export function missingProjectPrerequisites(project: Project, progress: Progress): string[] {
+  if (isProjectUnlocked(project, progress)) return [];
+  return project.prerequisites.filter((id) => !isLessonLearned(id, progress));
 }
 
 export type StageState = 'available' | 'partial' | 'planned' | 'locked' | 'completed';
@@ -121,9 +128,17 @@ export function stageState(stage: Stage, progress: Progress): StageState {
   return 'locked';
 }
 
-/** The lesson the learner should do next: first unlocked, not-completed lesson in order. */
+/** A lesson counts as learned when it was completed or its module was tested out of. */
+export function isLessonLearned(lessonId: string, progress: Progress): boolean {
+  if (isLessonCompleted(lessonId, progress)) return true;
+  const lesson = lessons[lessonId];
+  return !!lesson && isTestedOut(lesson.moduleId, progress);
+}
+
+/** The lesson the learner should do next: first unlocked, not-learned lesson in order (skipping tested-out modules). */
 export function nextRecommendedLesson(progress: Progress): string | undefined {
   for (const id of lessonOrder) {
+    if (isTestedOut(lessons[id].moduleId, progress)) continue;
     if (!isLessonCompleted(id, progress) && isLessonUnlocked(id, progress)) return id;
   }
   return undefined;
@@ -131,9 +146,15 @@ export function nextRecommendedLesson(progress: Progress): string | undefined {
 
 export function stage1Summary(progress: Progress): { done: number; total: number } {
   const s1 = stageById['s1'];
-  const total = s1.moduleIds.flatMap((m) => moduleById[m]?.lessonIds ?? []).length;
-  const done = s1.moduleIds.flatMap((m) => moduleById[m]?.lessonIds ?? []).filter((id) => isLessonCompleted(id, progress)).length;
-  return { done, total };
+  const ids = s1.moduleIds.flatMap((m) => moduleById[m]?.lessonIds ?? []);
+  return { done: ids.filter((id) => isLessonLearned(id, progress)).length, total: ids.length };
+}
+
+/** Concept ids that are due for review and belong to lessons the learner has actually learned. */
+export function dueConceptIds(progress: Progress, now = new Date()): string[] {
+  return Object.entries(progress.concepts)
+    .filter(([id, stats]) => isDue(stats, now) && conceptToLesson[id] !== undefined && isLessonLearned(conceptToLesson[id], progress))
+    .map(([id]) => id);
 }
 
 export function completedModuleCount(progress: Progress): number {

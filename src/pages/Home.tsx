@@ -1,10 +1,9 @@
 import { Link } from 'react-router-dom';
 import { useI18n } from '@/i18n';
 import { useStore, currentStreak } from '@/state/store';
-import { isLessonCompleted, isProjectUnlocked, nextRecommendedLesson, stage1Summary } from '@/state/unlock';
-import { isDue } from '@/state/review';
+import { dueConceptIds, isLessonCompleted, isLessonUnlocked, isProjectUnlocked, nextRecommendedLesson, stage1Summary } from '@/state/unlock';
 import { ACHIEVEMENTS } from '@/state/achievements';
-import { allProjects, lessons, moduleById } from '@/content';
+import { allProjects, lessons, moduleById, projects } from '@/content';
 import { Badge, ProgressBar, useDocumentTitle } from '@/components/ui';
 
 export function HomePage() {
@@ -17,11 +16,14 @@ export function HomePage() {
   const next = nextId ? lessons[nextId] : undefined;
   const last = progress.lastLocation;
   const lastLesson = last?.path.startsWith('/lesson/') ? lessons[last.path.slice('/lesson/'.length)] : undefined;
-  const resumeTarget = lastLesson && !isLessonCompleted(lastLesson.id, progress) ? `/lesson/${lastLesson.id}` : last?.path.startsWith('/project/') ? last.path : next ? `/lesson/${next.id}` : '/curriculum';
-  const resumeLabel = lastLesson && !isLessonCompleted(lastLesson.id, progress) ? l(lastLesson.title) : next ? l(next.title) : t('nav.curriculum');
+  const lastProject = last?.path.startsWith('/project/') ? projects[last.path.slice('/project/'.length)] : undefined;
+  const resumeLesson = lastLesson && !isLessonCompleted(lastLesson.id, progress) && isLessonUnlocked(lastLesson.id, progress) ? lastLesson : undefined;
+  const resumeProject = !resumeLesson && lastProject && isProjectUnlocked(lastProject, progress) && !progress.projects[lastProject.id]?.completedAt ? lastProject : undefined;
+  const resumeTarget = resumeLesson ? `/lesson/${resumeLesson.id}` : resumeProject ? `/project/${resumeProject.id}` : next ? `/lesson/${next.id}` : '/curriculum';
+  const resumeLabel = resumeLesson ? l(resumeLesson.title) : resumeProject ? l(resumeProject.title) : next ? l(next.title) : t('nav.curriculum');
   const summary = stage1Summary(progress);
-  const started = Object.keys(progress.lessons).length > 0;
-  const due = Object.values(progress.concepts).filter((c) => isDue(c)).length;
+  const started = Object.keys(progress.lessons).length > 0 || progress.testedOut.length > 0;
+  const due = dueConceptIds(progress).length;
   const streak = currentStreak(progress.activeDays);
   const recent = Object.entries(progress.achievements)
     .sort((a, b) => b[1].localeCompare(a[1]))
@@ -41,10 +43,10 @@ export function HomePage() {
           <h2 id="home-continue">{started ? t('home.continueTitle') : t('home.startTitle')}</h2>
           <p>
             <strong>{resumeLabel}</strong>
-            {lastLesson && (
+            {resumeLesson && (
               <span className="muted small">
                 {' '}
-                · {l(moduleById[lastLesson.moduleId]?.title ?? { en: '' })}
+                · {l(moduleById[resumeLesson.moduleId]?.title ?? { en: '' })}
               </span>
             )}
           </p>

@@ -57,6 +57,8 @@ export interface AssessmentAttempt {
 
 export interface AssessmentProgress {
   attempts: AssessmentAttempt[];
+  /** Total attempts ever made (attempts[] keeps only the last 20). */
+  attemptCount?: number;
   best: number;
   passed: boolean;
 }
@@ -274,6 +276,7 @@ export const useStore = create<AppState>()(
           const prev = s.progress.assessments[assessmentId] ?? { attempts: [], best: 0, passed: false };
           const next: AssessmentProgress = {
             attempts: [...prev.attempts, attempt].slice(-20),
+            attemptCount: (prev.attemptCount ?? prev.attempts.length) + 1,
             best: Math.max(prev.best, attempt.score),
             passed: prev.passed || attempt.passed,
           };

@@ -36,7 +36,7 @@ function AssessmentView({ assessment }: { assessment: Assessment }) {
 
   const mod = assessment.moduleId ? moduleById[assessment.moduleId] : undefined;
   const ap = progress.assessments[assessment.id];
-  const attemptNumber = ap?.attempts.length ?? 0;
+  const attemptNumber = ap?.attemptCount ?? ap?.attempts.length ?? 0;
   const [phase, setPhase] = useState<'intro' | 'running' | 'results'>('intro');
   const [questions, setQuestions] = useState<Question[]>([]);
   const [answers, setAnswers] = useState<QuizAnswer[]>([]);

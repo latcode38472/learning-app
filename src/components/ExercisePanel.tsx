@@ -65,6 +65,7 @@ export function ExercisePanel({ exercise, exam, onResult, heading, draftKey, tes
   const [showSolution, setShowSolution] = useState(false);
   const [attempts, setAttempts] = useState(0);
   const recordedFirst = useRef(false);
+  const passRecorded = useRef(false);
   const saveTimer = useRef<number | null>(null);
 
   // Reset local state when the exercise changes.
@@ -75,6 +76,7 @@ export function ExercisePanel({ exercise, exam, onResult, heading, draftKey, tes
     setShowSolution(false);
     setAttempts(0);
     recordedFirst.current = false;
+    passRecorded.current = false;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [exercise.id, key]);
 
@@ -112,8 +114,13 @@ export function ExercisePanel({ exercise, exam, onResult, heading, draftKey, tes
       setAttempts((a) => a + 1);
       recordAttempt(exercise.id, grade.passed, hintsShown);
       if (!exam) {
+        // Spaced-review statistics: one "wrong" for the first failed check and
+        // one "correct" for the first pass — never once per click.
         if (grade.passed) {
-          for (const c of exercise.concepts) recordConcept(c, true);
+          if (!passRecorded.current && !previouslyPassed) {
+            for (const c of exercise.concepts) recordConcept(c, true);
+          }
+          passRecorded.current = true;
         } else if (!recordedFirst.current) {
           for (const c of exercise.concepts) recordConcept(c, false);
         }

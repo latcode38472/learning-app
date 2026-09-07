@@ -5,7 +5,7 @@ import { lessons, moduleById, projects } from '@/content';
 import { useI18n } from '@/i18n';
 import { runtime, type GradeResult } from '@/runtime/runner';
 import { useStore } from '@/state/store';
-import { isProjectUnlocked } from '@/state/unlock';
+import { isProjectUnlocked, missingProjectPrerequisites } from '@/state/unlock';
 import { setTutorContext } from '@/tutor/context';
 import { Blocks } from '@/components/Blocks';
 import { CheckResults } from '@/components/CheckResults';
@@ -66,7 +66,7 @@ function ProjectView({ project }: { project: Project }) {
     });
   }, [project, step, hintsShown, l]);
 
-  const missing = useMemo(() => project.prerequisites.filter((id) => progress.lessons[id]?.status !== 'completed').map((id) => lessons[id]).filter(Boolean), [project, progress]);
+  const missing = useMemo(() => missingProjectPrerequisites(project, progress).map((id) => lessons[id]).filter(Boolean), [project, progress]);
 
   if (!unlocked) {
     return (

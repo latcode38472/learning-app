@@ -297,11 +297,16 @@ function LessonView({ lesson }: { lesson: Lesson }) {
           ) : (
             <span />
           )}
-          {nextId && (
-            <Link to={`/lesson/${nextId}`} className={`btn${completed ? ' btn-primary' : ''}`} aria-disabled={!completed && !isLessonUnlocked(nextId, progress)}>
-              {t('lesson.nextLesson')} →
-            </Link>
-          )}
+          {nextId &&
+            (isLessonUnlocked(nextId, progress) ? (
+              <Link to={`/lesson/${nextId}`} className={`btn${completed ? ' btn-primary' : ''}`}>
+                {t('lesson.nextLesson')} →
+              </Link>
+            ) : (
+              <button type="button" className="btn" disabled title={t('lesson.completeRequirements')}>
+                {t('lesson.nextLesson')} →
+              </button>
+            ))}
         </nav>
       </article>
 

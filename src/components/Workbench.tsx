@@ -102,11 +102,12 @@ export function Workbench({
   }, [execute, onRun, running, stdinText]);
 
   const sendInput = () => {
-    const next = stdinText === '' ? pendingInput : `${stdinText}\n${pendingInput}`;
-    setStdinText(next);
+    // Build the line list as an array so an empty first answer is still delivered.
+    const lines = [...splitStdin(stdinText), pendingInput];
+    setStdinText(lines.join('\n'));
     setPendingInput('');
     setShowStdin(true);
-    void execute(splitStdin(next));
+    void execute(lines);
   };
 
   const reset = () => {
