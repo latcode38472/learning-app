@@ -161,5 +161,8 @@ All of the following were run in this repository at delivery:
 * Translation review: all Hebrew content was written by the authors following
   the style guide and passes structural checks; a native-speaker editorial
   pass is still worthwhile.
+* Messages produced by `assert` statements inside Python check scripts
+  (`pythonTest`) exist only in English; the app labels them "Shown in English"
+  in other languages. Output/function checks are fully localized.
 * Code drafts are saved to localStorage; there is no cloud sync or accounts by
   design.
