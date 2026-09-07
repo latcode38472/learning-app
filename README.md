@@ -81,7 +81,34 @@ npm test              # Vitest: unlock rules, spaced review, i18n parity, conten
 npm run test:content  # runs every exercise solution/starter, predict answer, documented output,
                       # project step and module test through the Python sandbox (Node + Pyodide)
 npm run test:e2e      # Playwright: real browser, real Python — see e2e/core-flows.spec.ts
+
+# the same suite against a sub-path build, as GitHub Pages serves it:
+VITE_BASE=/learning-app/ npm run build && npm run preview &
+E2E_BASE_URL=http://127.0.0.1:4173/learning-app/ npm run test:e2e
 ```
+
+## Publishing it on the web (GitHub Pages)
+
+The app is a static site, so it can be hosted anywhere that serves files. A
+workflow for GitHub Pages is included at `.github/workflows/deploy-pages.yml`.
+
+One-time setup: in the repository, **Settings → Pages → Build and deployment →
+Source: GitHub Actions**. After that, every push to `main` (or to the
+development branch listed in the workflow) publishes the site to
+`https://<owner>.github.io/<repo>/`; you can also trigger it by hand from the
+Actions tab. Nothing else needs configuring — the workflow installs
+dependencies, copies the Python runtime into the bundle, builds with the right
+sub-path, and uploads the result.
+
+To host it somewhere else, build it yourself and serve the `dist/` folder:
+
+```bash
+npm run build                      # serves from the domain root
+VITE_BASE=/subfolder/ npm run build   # if it will live under a sub-path
+```
+
+`VITE_BASE` is the only setting that changes between hosts. Routing uses URL
+hashes, so no server-side rewrite rules are needed.
 
 Optional connected tutor (paid API, your own key):
 

@@ -5,7 +5,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
 async function onboard(page: Page, lang: 'en' | 'he' = 'en') {
-  await page.goto('/#/welcome');
+  await page.goto('#/welcome');
   await page.getByTestId(`lang-${lang}`).click();
   await page.getByTestId('onboarding-start').click();
   await expect(page.getByTestId('home')).toBeVisible();
@@ -39,9 +39,9 @@ test.describe('CodePath core flows', () => {
     await expect(page.getByTestId('lesson-l01-what-computers-do')).toBeVisible();
 
     // The second lesson is locked before the first is completed.
-    await page.goto('/#/lesson/l02-programs-and-files');
+    await page.goto('#/lesson/l02-programs-and-files');
     await expect(page.getByTestId('lesson-locked')).toBeVisible();
-    await page.goto('/#/lesson/l01-what-computers-do');
+    await page.goto('#/lesson/l01-what-computers-do');
 
     // Run code with a deliberate mistake: a friendly error appears.
     await setEditor(page, 'exercise', 'print("Hello');
@@ -70,7 +70,7 @@ test.describe('CodePath core flows', () => {
 
     // Progress survives a reload (saved in localStorage) and the home page resumes there.
     await page.reload();
-    await page.goto('/#/');
+    await page.goto('#/');
     await expect(page.getByTestId('home')).toContainText('1 of');
     await page.getByTestId('home-resume').click();
     await expect(page.getByTestId('lesson-l02-programs-and-files')).toBeVisible();
@@ -79,7 +79,7 @@ test.describe('CodePath core flows', () => {
   test('a wrong exercise answer gives a diff and hints, then the solution', async ({ page }) => {
     test.setTimeout(180_000);
     await onboard(page);
-    await page.goto('/#/lesson/l01-what-computers-do');
+    await page.goto('#/lesson/l01-what-computers-do');
     await setEditor(page, 'exercise', 'print("Hello world")');
     await page.getByTestId('exercise-check').click();
     await expect(page.getByTestId('exercise-result')).toContainText(/did not pass/, { timeout: 90_000 });
@@ -96,7 +96,7 @@ test.describe('CodePath core flows', () => {
     test.setTimeout(300_000);
     await onboard(page);
     // Placement lets an experienced learner test out of module 1 directly.
-    await page.goto('/#/placement');
+    await page.goto('#/placement');
     await page.getByTestId('placement-m1').getByRole('link').click();
     await expect(page.getByTestId('assessment-intro')).toBeVisible();
     await page.getByTestId('assessment-start').click();
@@ -134,7 +134,7 @@ test.describe('CodePath core flows', () => {
     await onboard(page, 'he');
     await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
     await expect(page.getByTestId('home')).toContainText('שלום');
-    await page.goto('/#/lesson/l01-what-computers-do');
+    await page.goto('#/lesson/l01-what-computers-do');
     await expect(page.getByTestId('lesson-l01-what-computers-do')).toBeVisible();
     // The editor is forced left-to-right inside the RTL page.
     const dir = await page.getByTestId('exercise').locator('.workbench-editor').first().getAttribute('dir');
@@ -147,7 +147,7 @@ test.describe('CodePath core flows', () => {
 
   test('curriculum map shows all ten stages with planned modules explained', async ({ page }) => {
     await onboard(page);
-    await page.goto('/#/curriculum');
+    await page.goto('#/curriculum');
     for (let n = 1; n <= 10; n += 1) await expect(page.getByTestId(`stage-s${n}`)).toBeVisible();
     await page.getByTestId('stage-s7').getByRole('button').first().click();
     await expect(page.getByTestId('stage-s7')).toContainText('Planned');
@@ -157,7 +157,7 @@ test.describe('CodePath core flows', () => {
   test('interactive input: a program waiting for input() can be answered in the console', async ({ page }) => {
     test.setTimeout(180_000);
     await onboard(page);
-    await page.goto('/#/lesson/l01-what-computers-do');
+    await page.goto('#/lesson/l01-what-computers-do');
     await setEditor(page, 'exercise', 'name = input("Name? ")\nprint("Hi", name)');
     await page.getByTestId('exercise-run').click();
     await expect(page.getByTestId('exercise-need-input')).toBeVisible({ timeout: 90_000 });
@@ -169,7 +169,7 @@ test.describe('CodePath core flows', () => {
   test('a runaway loop is stopped with a friendly message', async ({ page }) => {
     test.setTimeout(180_000);
     await onboard(page);
-    await page.goto('/#/lesson/l01-what-computers-do');
+    await page.goto('#/lesson/l01-what-computers-do');
     await setEditor(page, 'exercise', 'while True:\n    pass');
     await page.getByTestId('exercise-run').click();
     await expect(page.getByTestId('exercise-console')).toContainText(/stopped/, { timeout: 90_000 });
@@ -190,7 +190,7 @@ test.describe('CodePath core flows', () => {
       localStorage.setItem('codepath.v1', JSON.stringify(data));
     });
     await page.reload();
-    await page.goto('/#/project/p-guessing-game');
+    await page.goto('#/project/p-guessing-game');
     await expect(page.getByTestId('project-p-guessing-game')).toBeVisible();
     await setEditor(page, 'project-p-guessing-game', 'import random\nsecret = random.randint(1, 100)\nprint("I am thinking of a number between 1 and 100.")');
     await page.getByTestId('project-check-step').click();

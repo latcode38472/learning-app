@@ -15,7 +15,9 @@ export default defineConfig({
   retries: 0,
   reporter: [['list']],
   use: {
-    baseURL: 'http://127.0.0.1:4173',
+    // Override to test a sub-path deployment (GitHub Pages project site), e.g.
+    // E2E_BASE_URL=http://127.0.0.1:4173/learning-app/
+    baseURL: process.env.E2E_BASE_URL ?? 'http://127.0.0.1:4173/',
     trace: 'retain-on-failure',
     ...devices['Desktop Chrome'],
     launchOptions: executablePath ? { executablePath } : {},

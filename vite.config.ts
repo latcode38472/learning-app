@@ -4,7 +4,12 @@ import { fileURLToPath, URL } from 'node:url';
 
 // The app is a static single-page app. Python runs in the browser (Pyodide,
 // served from /pyodide). No server is required for lessons, exercises or grading.
+//
+// VITE_BASE sets the public path. Leave it unset for local dev and for hosts
+// that serve the site at the domain root; set it to "/<repo>/" when publishing
+// to a GitHub Pages project site (the deploy workflow does this).
 export default defineConfig({
+  base: process.env.VITE_BASE ?? '/',
   plugins: [react()],
   resolve: {
     alias: {

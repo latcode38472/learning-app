@@ -1,0 +1,74 @@
+name: Deploy to GitHub Pages
+
+# Publishes the app to https://<owner>.github.io/<repo>/ on every push to the
+# branches below, and on demand from the Actions tab.
+#
+# One-time setup in the repository: Settings -> Pages -> Build and deployment ->
+# Source: "GitHub Actions". Nothing else is needed; the site is fully static.
+
+on:
+  push:
+    branches:
+      - main
+      - claude/programming-learning-app-mm4gku
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Let a running deploy finish rather than cancelling it half-published.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      # Installs dependencies and, via postinstall, copies the Pyodide runtime
+      # (Python compiled to WebAssembly) into public/pyodide so the published
+      # site serves it itself instead of relying on a CDN.
+      - run: npm ci
+
+      - uses: actions/configure-pages@v6
+        id: pages
+
+      # A project site is served from /<repo>/, a user site from /. Normalise to
+      # exactly one leading and one trailing slash, which is what Vite expects.
+      - name: Compute base path
+        id: base
+        env:
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}
+        run: |
+          base="/${BASE_PATH#/}"
+          base="${base%/}/"
+          echo "value=$base" >> "$GITHUB_OUTPUT"
+          echo "Building with base $base"
+
+      - name: Build
+        run: npm run build
+        env:
+          VITE_BASE: ${{ steps.base.outputs.value }}
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/deploy-pages@v5
+        id: deployment
