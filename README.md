@@ -82,8 +82,10 @@ npm run test:content  # runs every exercise solution/starter, predict answer, do
                       # project step and module test through the Python sandbox (Node + Pyodide)
 npm run test:e2e      # Playwright: real browser, real Python — see e2e/core-flows.spec.ts
 
-# the same suite against a sub-path build, as GitHub Pages serves it:
-VITE_BASE=/learning-app/ npm run build && npm run preview &
+# the same suite against a sub-path build, as GitHub Pages serves it
+# (VITE_BASE must be set for both the build and the server that serves it):
+export VITE_BASE=/learning-app/
+npm run build && npm run preview &
 E2E_BASE_URL=http://127.0.0.1:4173/learning-app/ npm run test:e2e
 ```
 
