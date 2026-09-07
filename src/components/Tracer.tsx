@@ -3,7 +3,7 @@
  * variables hold, what has been printed so far, and function calls/returns.
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { runtime, type TraceResult } from '@/runtime/runner';
+import { randomSeed, runtime, type TraceResult } from '@/runtime/runner';
 import { explainError } from '@/runtime/errors';
 import { useI18n } from '@/i18n';
 import { Notice } from './ui';
@@ -81,7 +81,7 @@ export function Tracer({ code, stdin = [], caption, autoRun = false }: Props) {
     setLoading(true);
     setPlaying(false);
     try {
-      const res = await runtime.trace(code, { stdin });
+      const res = await runtime.trace(code, { stdin, seed: randomSeed() });
       setTrace(res);
       setIndex(0);
     } finally {
@@ -195,6 +195,16 @@ export function Tracer({ code, stdin = [], caption, autoRun = false }: Props) {
                 </div>
               )}
               {atEnd && !trace?.error && <div className="small muted" style={{ marginTop: '0.4rem' }}>{trace?.truncated ? L.limit : L.finished}</div>}
+            </>
+          )}
+          {trace && total === 0 && (
+            <>
+              {trace.timedOut && <Notice tone="warning">{t('editor.timeout', { seconds: 8 })}</Notice>}
+              {trace.error && (
+                <div className="small" style={{ color: 'var(--danger)' }}>
+                  {trace.error.type}: {explainError(trace.error, lang).explanation}
+                </div>
+              )}
             </>
           )}
         </div>

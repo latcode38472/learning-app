@@ -26,10 +26,10 @@ export function CheckResults({ result }: { result: GradeResult }) {
   const { t, lang, l } = useI18n();
   const total = result.results.length;
   const failed = result.results.filter((r) => !r.passed).length;
-  if (result.timedOut) {
+  if (result.timedOut || result.workerError) {
     return (
       <div className="notice notice-danger" role="alert">
-        <div>{t('editor.timeout', { seconds: 20 })}</div>
+        <div>{result.timedOut ? t('editor.timeout', { seconds: 20 }) : `${t('common.error')}: ${result.workerError}`}</div>
       </div>
     );
   }

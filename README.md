@@ -127,9 +127,13 @@ English with a notice.
 ## Safety and privacy
 
 * Learner code runs only in the browser sandbox (WebAssembly, Web Worker);
-  the app has no server-side execution at all.
+  the app has no server-side execution at all. Inside the sandbox the modules
+  that bridge into the JavaScript host (`js`, `pyodide`, …) are hidden from
+  learner code, and interpreter state (imported modules, built-ins, recursion
+  limit) is reset after every run so one program cannot affect the next.
 * Time limit (8 s per run, 20 s per check), output cap, automatic restart of
-  a hung worker.
+  a hung or crashed worker; the harness's control signals cannot be swallowed
+  by a learner's `except Exception:`.
 * No API keys in client code. The optional tutor server holds the key and
   rate-limits requests; the client shows an explicit cost notice.
 * No training jobs, GPU jobs or paid services are ever started by the app.

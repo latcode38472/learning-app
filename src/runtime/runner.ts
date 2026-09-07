@@ -49,6 +49,8 @@ export interface GradeResult {
   passed: boolean;
   results: CheckResult[];
   timedOut?: boolean;
+  /** The sandbox itself failed (e.g. a fatal WebAssembly error); it has been restarted. */
+  workerError?: string;
 }
 
 export interface TraceStep {
@@ -83,6 +85,17 @@ export class TimeoutError extends Error {
 }
 
 const DEFAULT_TIMEOUT_MS = 8_000;
+
+/** A fresh seed for runs where randomness should look random (not for grading). */
+export function randomSeed(): number {
+  return Math.floor(Math.random() * 1_000_000) + 1;
+}
+
+/** Turn a failure of the sandbox itself into a learner-facing error object. */
+function workerFailure(e: unknown): PythonError {
+  const message = e instanceof Error ? e.message : String(e);
+  return { type: 'SandboxError', message, line: null, source: null, traceback: message };
+}
 
 function resolveIndexURL(): string {
   const configured = import.meta.env.VITE_PYODIDE_INDEX_URL as string | undefined;
@@ -146,14 +159,20 @@ class PythonRuntime {
     if (this.readyPromise) return this.readyPromise;
     this.setStatus('loading');
     this.worker = this.spawn();
-    this.readyPromise = this.send('init', { indexURL: resolveIndexURL() }, 120_000)
-      .then(() => this.setStatus('ready'))
+    const promise: Promise<void> = this.send('init', { indexURL: resolveIndexURL() }, 120_000)
+      .then(() => {
+        if (this.readyPromise === promise) this.setStatus('ready');
+      })
       .catch((e) => {
-        this.setStatus('error');
-        this.readyPromise = null;
+        // Only clear our own promise: a restart may already have installed a newer one.
+        if (this.readyPromise === promise) {
+          this.setStatus('error');
+          this.readyPromise = null;
+        }
         throw e;
       });
-    return this.readyPromise;
+    this.readyPromise = promise;
+    return promise;
   }
 
   private send(type: string, payload: unknown, timeoutMs: number): Promise<unknown> {
@@ -165,8 +184,8 @@ class PythonRuntime {
       const id = this.nextId++;
       const timer = window.setTimeout(() => {
         this.pending.delete(id);
-        this.restart();
         reject(new TimeoutError(Math.round(timeoutMs / 1000)));
+        this.restart();
       }, timeoutMs);
       this.pending.set(id, { resolve, reject, timer });
       const message = type === 'init' ? { id, type, ...(payload as object) } : { id, type, payload };
@@ -212,6 +231,12 @@ class PythonRuntime {
     });
   }
 
+  /** Any failure of the sandbox itself (not a timeout) leaves it in an unknown state: restart it. */
+  private recover(e: unknown): void {
+    if (e instanceof TimeoutError) return;
+    this.restart();
+  }
+
   async run(code: string, opts: { stdin?: string[]; seed?: number; timeoutMs?: number } = {}): Promise<RunResult> {
     const started = performance.now();
     try {
@@ -223,7 +248,8 @@ class PythonRuntime {
       return { ...res, elapsedMs: performance.now() - started };
     } catch (e) {
       if (e instanceof TimeoutError) return { stdout: '', error: null, needInput: null, truncated: false, timedOut: true };
-      throw e;
+      this.recover(e);
+      return { stdout: '', error: workerFailure(e), needInput: null, truncated: false };
     }
   }
 
@@ -232,7 +258,8 @@ class PythonRuntime {
       return await this.request<GradeResult>('grade', { code, check, seed: opts.seed ?? 1 }, opts.timeoutMs ?? 20_000);
     } catch (e) {
       if (e instanceof TimeoutError) return { passed: false, results: [], timedOut: true };
-      throw e;
+      this.recover(e);
+      return { passed: false, results: [], workerError: workerFailure(e).message };
     }
   }
 
@@ -247,7 +274,8 @@ class PythonRuntime {
       if (e instanceof TimeoutError) {
         return { steps: [], finalVars: {}, stdout: '', error: null, needInput: null, truncated: false, timedOut: true };
       }
-      throw e;
+      this.recover(e);
+      return { steps: [], finalVars: {}, stdout: '', error: workerFailure(e), needInput: null, truncated: false };
     }
   }
 }

@@ -14,27 +14,37 @@ Public functions (all return JSON-friendly dicts):
 """
 
 import builtins
+import io
+import json
 import linecache
-import random
+import random as _random_module
 import re
 import sys
+import tokenize
 import traceback
 
 USER_FILE = "main.py"
 MAX_OUTPUT = 60_000
 
+# Modules that would let learner code reach the JavaScript host (worker scope,
+# fetch, postMessage). They are hidden while learner code runs.
+BLOCKED_MODULE_PREFIXES = ("js", "pyodide", "pyodide_js", "_pyodide")
 
-class OutputLimitExceeded(Exception):
+
+# Control-flow signals derive from BaseException so that a learner's
+# `except Exception:` cannot swallow them (a bare `except:` still can; the
+# main-thread timeout is the backstop for that).
+class OutputLimitExceeded(BaseException):
     pass
 
 
-class NeedInput(Exception):
+class NeedInput(BaseException):
     def __init__(self, prompt):
         super().__init__(prompt)
         self.prompt = prompt
 
 
-class TraceLimit(Exception):
+class TraceLimit(BaseException):
     pass
 
 
@@ -45,14 +55,22 @@ class _LimitedOut:
         self.buf = []
         self.size = 0
         self.limit = limit
+        self.exceeded = False
 
     def write(self, s):
+        if self.exceeded:
+            return 0
         if not isinstance(s, str):
             s = str(s)
+        if self.size + len(s) > self.limit:
+            room = self.limit - self.size
+            if room > 0:
+                self.buf.append(s[:room])
+                self.size += room
+            self.exceeded = True
+            raise OutputLimitExceeded()
         self.buf.append(s)
         self.size += len(s)
-        if self.size > self.limit:
-            raise OutputLimitExceeded()
         return len(s)
 
     def flush(self):
@@ -83,27 +101,40 @@ def _register_source(code):
     linecache.cache[USER_FILE] = (len(code), None, code.splitlines(True), USER_FILE)
 
 
+def _safe_str(value):
+    try:
+        return str(value)
+    except BaseException:  # noqa: BLE001 - a broken __str__ must not crash the harness
+        return "<unprintable message>"
+
+
 def _format_error(exc, code):
     tb = exc.__traceback__
     line = None
     frames = []
     if tb is not None:
-        for entry in traceback.extract_tb(tb):
-            if entry.filename == USER_FILE:
-                frames.append(entry)
-                line = entry.lineno
+        try:
+            for entry in traceback.extract_tb(tb):
+                if entry.filename == USER_FILE:
+                    frames.append(entry)
+                    line = entry.lineno
+        except BaseException:  # noqa: BLE001
+            frames = []
     if isinstance(exc, SyntaxError) and exc.filename == USER_FILE:
         line = exc.lineno
-        message = exc.msg or str(exc)
+        message = exc.msg or _safe_str(exc)
     else:
-        message = str(exc)
+        message = _safe_str(exc)
     lines = code.split("\n")
     source = lines[line - 1] if line and 0 < line <= len(lines) else None
     parts = []
-    if frames:
-        parts.append("Traceback (most recent call last):\n")
-        parts.extend(traceback.format_list(frames))
-    parts.extend(traceback.format_exception_only(type(exc), exc))
+    try:
+        if frames:
+            parts.append("Traceback (most recent call last):\n")
+            parts.extend(traceback.format_list(frames))
+        parts.extend(traceback.format_exception_only(type(exc), exc))
+    except BaseException:  # noqa: BLE001
+        parts = [type(exc).__name__ + ": " + message + "\n"]
     return {
         "type": type(exc).__name__,
         "message": message,
@@ -113,39 +144,95 @@ def _format_error(exc, code):
     }
 
 
+class _BlockedFinder:
+    """Import hook that refuses the modules bridging into the JavaScript host."""
+
+    def find_spec(self, name, path=None, target=None):
+        root = name.split(".")[0]
+        if root in BLOCKED_MODULE_PREFIXES:
+            raise ImportError("The module '" + root + "' is not available inside the learning sandbox.")
+        return None
+
+
 def _fresh_namespace():
     return {"__name__": "__main__", "__builtins__": builtins}
+
+
+class _Sandbox:
+    """Hides host-bridge modules and restores interpreter state after a run."""
+
+    def __enter__(self):
+        self.hidden = {}
+        for name in list(sys.modules):
+            if name.split(".")[0] in BLOCKED_MODULE_PREFIXES:
+                self.hidden[name] = sys.modules.pop(name)
+        self.finder = _BlockedFinder()
+        sys.meta_path.insert(0, self.finder)
+        self.modules_before = set(sys.modules)
+        self.builtins_before = dict(builtins.__dict__)
+        # The random module is shared (check scripts may patch it on purpose);
+        # learner patches made during the run are undone afterwards.
+        self.random_before = dict(_random_module.__dict__)
+        self.recursion_limit = sys.getrecursionlimit()
+        return self
+
+    def __exit__(self, *exc):
+        try:
+            sys.meta_path.remove(self.finder)
+        except ValueError:
+            pass
+        # Drop modules the learner imported so their patches do not leak into later runs.
+        for name in list(sys.modules):
+            if name not in self.modules_before:
+                sys.modules.pop(name, None)
+        sys.modules.update(self.hidden)
+        _restore_dict(builtins.__dict__, self.builtins_before)
+        _restore_dict(_random_module.__dict__, self.random_before)
+        sys.setrecursionlimit(self.recursion_limit)
+        return False
+
+
+def _restore_dict(target, snapshot):
+    for key in list(target):
+        if key not in snapshot:
+            del target[key]
+    target.update(snapshot)
+
+
+def _seed_random(seed):
+    _random_module.seed(seed)
 
 
 def _execute(code, stdin_lines, seed, echo, show_prompt, output_limit=MAX_OUTPUT, before_exec=None, after_exec=None):
     out = _LimitedOut(output_limit)
     saved = (sys.stdout, sys.stderr, builtins.input)
-    sys.stdout = out
-    sys.stderr = out
-    builtins.input = _make_input(stdin_lines, out, echo, show_prompt)
-    random.seed(seed)
-    ns = _fresh_namespace()
     result = {"stdout": "", "error": None, "needInput": None, "truncated": False}
+    ns = _fresh_namespace()
     _register_source(code)
-    try:
-        compiled = compile(code, USER_FILE, "exec")
-        if before_exec:
-            before_exec()
-        exec(compiled, ns)
-    except NeedInput as e:
-        result["needInput"] = e.prompt
-    except OutputLimitExceeded:
-        result["truncated"] = True
-    except TraceLimit:
-        result["traceLimit"] = True
-    except SystemExit:
-        pass
-    except BaseException as e:  # noqa: BLE001 - we want to report every learner error
-        result["error"] = _format_error(e, code)
-    finally:
-        if after_exec:
-            after_exec()
-        sys.stdout, sys.stderr, builtins.input = saved
+    with _Sandbox():
+        sys.stdout = out
+        sys.stderr = out
+        builtins.input = _make_input(stdin_lines, out, echo, show_prompt)
+        _seed_random(seed)
+        try:
+            compiled = compile(code, USER_FILE, "exec")
+            if before_exec:
+                before_exec()
+            exec(compiled, ns)
+        except NeedInput as e:
+            result["needInput"] = e.prompt
+        except OutputLimitExceeded:
+            result["truncated"] = True
+        except TraceLimit:
+            result["traceLimit"] = True
+        except SystemExit:
+            pass
+        except BaseException as e:  # noqa: BLE001 - we want to report every learner error
+            result["error"] = _format_error(e, code)
+        finally:
+            if after_exec:
+                after_exec()
+            sys.stdout, sys.stderr, builtins.input = saved
     result["stdout"] = out.getvalue()[:output_limit]
     return result, ns
 
@@ -159,6 +246,7 @@ def run_program(code, stdin_lines=(), seed=0, echo=True, show_prompt=True):
 
 
 def _normalize(text, mode):
+    text = text if isinstance(text, str) else _safe_str(text)
     lines = [l.rstrip() for l in text.replace("\r\n", "\n").split("\n")]
     while lines and lines[-1] == "":
         lines.pop()
@@ -173,15 +261,28 @@ def _normalize(text, mode):
 def _safe_repr(value, limit=80):
     try:
         r = repr(value)
-    except Exception:  # noqa: BLE001
+    except BaseException:  # noqa: BLE001
         r = "<unprintable>"
     if len(r) > limit:
         r = r[: limit - 1] + "…"
     return r
 
 
+def _code_only(source):
+    """Source with comments removed, so structural requirements ignore `# notes`."""
+    try:
+        tokens = []
+        for tok in tokenize.generate_tokens(io.StringIO(source).readline):
+            if tok.type == tokenize.COMMENT:
+                continue
+            tokens.append(tok)
+        return tokenize.untokenize(tokens)
+    except BaseException:  # noqa: BLE001 - unparsable code is matched as written
+        return source
+
+
 def _capture(fn):
-    """Run fn() capturing stdout; returns (value, printed_text, error_dict_or_None)."""
+    """Run fn() capturing stdout; returns (value, printed_text, error_or_None)."""
     out = _LimitedOut()
     saved = (sys.stdout, sys.stderr)
     sys.stdout = out
@@ -195,66 +296,102 @@ def _capture(fn):
         sys.stdout, sys.stderr = saved
 
 
+def _bad_test(kind, message):
+    return {
+        "kind": kind,
+        "passed": False,
+        "reason": "bad-test",
+        "message": {"en": "This check is misconfigured: " + message, "he": "הבדיקה הזאת מוגדרת בצורה שגויה: " + message},
+    }
+
+
+def _pattern_matches(pattern, text):
+    try:
+        return re.search(pattern, text, re.MULTILINE) is not None, None
+    except re.error as e:
+        return False, "invalid pattern (" + _safe_str(e) + ")"
+
+
 def grade(code, check, seed=0):
     results = []
     all_passed = True
+    code_only = _code_only(code)
 
     for req in check.get("requires") or []:
-        ok = re.search(req["pattern"], code, re.MULTILINE) is not None
-        results.append({"kind": "requires", "passed": ok, "message": req.get("message")})
-        all_passed = all_passed and ok
+        ok, problem = _pattern_matches(req.get("pattern", ""), code_only)
+        if problem:
+            results.append(_bad_test("requires", problem))
+        else:
+            results.append({"kind": "requires", "passed": ok, "message": req.get("message")})
+        all_passed = all_passed and ok and not problem
 
     for req in check.get("forbids") or []:
-        ok = re.search(req["pattern"], code, re.MULTILINE) is None
-        results.append({"kind": "forbids", "passed": ok, "message": req.get("message")})
-        all_passed = all_passed and ok
+        found, problem = _pattern_matches(req.get("pattern", ""), code_only)
+        ok = not found
+        if problem:
+            results.append(_bad_test("forbids", problem))
+        else:
+            results.append({"kind": "forbids", "passed": ok, "message": req.get("message")})
+        all_passed = all_passed and ok and not problem
 
     for index, tc in enumerate(check.get("tests") or []):
-        r = {"kind": "test", "index": index, "type": tc["type"], "name": tc.get("name"), "passed": False}
+        r = {"kind": "test", "index": index, "type": tc.get("type"), "name": tc.get("name"), "passed": False}
         stdin_lines = tc.get("stdin") or []
         res, ns = _execute(code, stdin_lines, seed, echo=False, show_prompt=False)
         r["stdin"] = stdin_lines
         r["actual"] = res["stdout"]
+        # A program that reads input at top level can still define correct functions.
+        ran_to_end = res["needInput"] is None or tc.get("type") == "function"
         if res["error"]:
             r["error"] = res["error"]
-        elif res["needInput"] is not None:
+        elif not ran_to_end:
             r["reason"] = "need-input"
         elif res["truncated"]:
             r["reason"] = "too-much-output"
-        elif tc["type"] == "output":
+        elif tc.get("type") == "output":
             mode = tc.get("match") or "trimmed"
-            expected = tc["expected"]
+            expected = tc.get("expected", "")
             actual = res["stdout"]
             if mode == "contains":
                 passed = _normalize(expected, "trimmed") in _normalize(actual, "trimmed")
             elif mode == "regex":
-                passed = re.search(expected, actual, re.MULTILINE) is not None
+                passed, problem = _pattern_matches(expected, actual)
+                if problem:
+                    r["reason"] = "bad-test"
+                    r["message"] = _bad_test("test", problem)["message"]
             else:
                 passed = _normalize(actual, mode) == _normalize(expected, mode)
-            r["passed"] = passed
-            r["expected"] = expected
+            r["passed"] = bool(passed)
+            r["expected"] = expected if isinstance(expected, str) else _safe_str(expected)
             r["match"] = mode
-        elif tc["type"] == "function":
+        elif tc.get("type") == "function":
             value, printed, err = _capture(lambda: eval(tc["call"], ns))
             r["call"] = tc["call"]
-            if err is not None:
+            if isinstance(err, OutputLimitExceeded):
+                r["reason"] = "too-much-output"
+            elif isinstance(err, NeedInput):
+                r["reason"] = "need-input"
+            elif err is not None:
                 r["error"] = _format_error(err, code)
             else:
                 try:
                     expected = eval(tc["expected"], {"__builtins__": builtins})
-                except Exception as e:  # noqa: BLE001
-                    r["reason"] = "bad-expected"
-                    r["message"] = "Test error: " + type(e).__name__ + ": " + str(e)
+                except BaseException as e:  # noqa: BLE001
+                    r["reason"] = "bad-test"
+                    r["message"] = _bad_test("test", "expected value cannot be evaluated: " + _safe_str(e))["message"]
                     expected = None
                 if "reason" not in r:
-                    same = value == expected and isinstance(value, bool) == isinstance(expected, bool)
+                    try:
+                        same = value == expected and isinstance(value, bool) == isinstance(expected, bool)
+                    except BaseException:  # noqa: BLE001
+                        same = False
                     r["passed"] = bool(same)
                     r["expected"] = _safe_repr(expected)
                     r["actualValue"] = _safe_repr(value)
                     if not same and value is None and printed.strip():
                         r["reason"] = "printed-not-returned"
                         r["printed"] = printed
-        elif tc["type"] == "python":
+        elif tc.get("type") == "python":
             def _run(lines=()):
                 inner, _ = _execute(code, list(lines), seed, echo=False, show_prompt=False)
                 return inner["stdout"]
@@ -266,13 +403,20 @@ def grade(code, check, seed=0):
                 "source": code,
                 "run": _run,
             }
-            _v, _printed, err = _capture(lambda: exec(tc["script"], env))
+            _v, _printed, err = _capture(lambda: exec(tc.get("script", ""), env))
             if err is None:
                 r["passed"] = True
             elif isinstance(err, AssertionError):
-                r["message"] = str(err) or "A check did not pass."
+                r["message"] = _safe_str(err) or "A check did not pass."
+            elif isinstance(err, NeedInput):
+                r["reason"] = "need-input"
+            elif isinstance(err, OutputLimitExceeded):
+                r["reason"] = "too-much-output"
             else:
-                r["message"] = "Check error: " + type(err).__name__ + ": " + str(err)
+                r["message"] = "Check error: " + type(err).__name__ + ": " + _safe_str(err)
+        else:
+            r["reason"] = "bad-test"
+            r["message"] = _bad_test("test", "unknown test type")["message"]
         all_passed = all_passed and r["passed"]
         results.append(r)
 
@@ -300,7 +444,7 @@ def trace_program(code, stdin_lines=(), seed=0, max_steps=400):
         variables = {}
         try:
             items = list(frame.f_locals.items())
-        except Exception:  # noqa: BLE001
+        except BaseException:  # noqa: BLE001
             items = []
         for k, v in items:
             if _is_hidden(k, v):
@@ -355,8 +499,6 @@ def trace_program(code, stdin_lines=(), seed=0, max_steps=400):
 # ---------------------------------------------------------------- JSON entry points
 # The worker and the validator talk to the harness with JSON strings so no
 # Python objects cross the boundary.
-
-import json  # noqa: E402
 
 
 def run_json(request):

@@ -5,7 +5,7 @@
 import { useState } from 'react';
 import type { Block } from '@/content/schema';
 import { useI18n } from '@/i18n';
-import { runtime, type RunResult } from '@/runtime/runner';
+import { randomSeed, runtime, type RunResult } from '@/runtime/runner';
 import { explainError } from '@/runtime/errors';
 import { Inline } from './InlineText';
 import { Tracer } from './Tracer';
@@ -116,7 +116,7 @@ function CodeBlock({ block }: { block: Extract<Block, { kind: 'code' }> }) {
   const run = async () => {
     setRunning(true);
     try {
-      setResult(await runtime.run(source));
+      setResult(await runtime.run(source, { seed: randomSeed() }));
     } finally {
       setRunning(false);
     }
