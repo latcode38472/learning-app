@@ -153,7 +153,7 @@ export const lesson: Lesson = {
       `, { output: '9\n7' }),
       p(
         'When `a > b` is true, the first `return` runs and the function is finished; the last line is never reached. When it is false, the `if` block is skipped and `return b` runs.',
-        'כש-`a > b` מתקיים, ה-`return` הראשון רץ והפונקציה מסתיימת; השורה האחרונה לא מגיעה לתור בכלל. כשהוא לא מתקיים, בלוק ה-`if` מדולג ו-`return b` רץ.',
+        'כש-`a > b` מתקיים, ה-`return` הראשון רץ והפונקציה מסתיימת; לשורה האחרונה בכלל לא מגיעים. כשהוא לא מתקיים, בלוק ה-`if` מדולג ו-`return b` רץ.',
       ),
     ],
     [
@@ -301,7 +301,7 @@ export const lesson: Lesson = {
       code('Items: 46\nShipping: 20\nTotal: 66', { lang: 'text', runnable: false }),
       p(
         'The functions must not print anything; all printing happens outside them.',
-        'הפונקציות לא צריכות להדפיס שום דבר; כל ההדפסה מתבצעת מחוץ להן.',
+        'אסור לפונקציות להדפיס שום דבר; כל ההדפסה מתבצעת מחוץ להן.',
       ),
     ],
     starterCode: py`

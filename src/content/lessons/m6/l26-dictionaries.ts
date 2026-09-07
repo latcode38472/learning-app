@@ -83,7 +83,7 @@ export const lesson: Lesson = {
       city = person["city"]
     `),
     code(
-      "Traceback (most recent call last):\n  File \"main.py\", line 2, in <module>\nKeyError: 'city'",
+      "Traceback (most recent call last):\n  File \"main.py\", line 2, in <module>\n    city = person[\"city\"]\n           ~~~~~~^^^^^^^^\nKeyError: 'city'",
       { lang: 'text', runnable: false, caption: t('The error message', 'הודעת השגיאה') },
     ),
     term(
@@ -237,7 +237,7 @@ export const lesson: Lesson = {
     hints: [
       ['Loop with `for name, age in ages.items():` so you see the name and the age together.', 'עברו בלולאה `for name, age in ages.items():` כדי לראות את השם ואת הגיל יחד.'],
       ['Inside the loop: `if age > best_age:` — then update both `best_age` and `best_name`.', 'בתוך הלולאה: `if age > best_age:` — ואז עדכנו גם את `best_age` וגם את `best_name`.'],
-      ['After the loop ends, `return best_name`.', 'אחרי שהלולאה מסתיימת, `return best_name`.'],
+      ['Inside the `if`: `best_age = age` and then `best_name = name`. The `return best_name` after the loop is already there.', 'בתוך ה-`if`: `best_age = age` ואז `best_name = name`. ה-`return best_name` שאחרי הלולאה כבר נמצא בקוד.'],
     ],
     solution: py`
       def oldest(ages):
@@ -411,7 +411,7 @@ export const lesson: Lesson = {
           feedback: ['This gives only the keys. You would need d[k] inside the loop to reach each value.', 'זה נותן רק את המפתחות. הייתם צריכים d[k] בתוך הלולאה כדי להגיע לכל ערך.'],
         }),
         opt('`for k, v in d:`', '`for k, v in d:`', {
-          feedback: ['Without items() each time round gives a single key, and Python cannot split it into two variables — this is an error.', 'בלי items() כל סיבוב נותן מפתח בודד, ופייתון לא יכול לפצל אותו לשני משתנים — זו שגיאה.'],
+          feedback: ['Without items() each round gives only the key, not a pair, so there is no value for v; Python tries to split the key string itself — for keys like these that is an error.', 'בלי items() כל סיבוב נותן רק את המפתח, לא זוג, ולכן אין ערך ל-v; פייתון מנסה לפצל את המחרוזת של המפתח עצמו — עבור מפתחות כמו אלה זו שגיאה.'],
         }),
       ],
       ['dict-loop'],

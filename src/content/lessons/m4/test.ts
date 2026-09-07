@@ -307,7 +307,7 @@ export const test: Assessment = {
       variants: [
         codeQ({
           id: 'm4-t-q9-a',
-          title: ['Count up', 'ספירה למעלה'],
+          title: ['Count up', 'ספירה עולה'],
           mode: 'write',
           instructions: [
             p(
@@ -511,7 +511,7 @@ export const test: Assessment = {
           instructions: [
             p(
               'Read the height and then the width (two whole numbers, any prompt texts) and print a rectangle of stars with that many rows and columns. For 2 and 3 the output is two rows of `***`.',
-              'קראו את הגובה ואחר כך את הרוחב (שני מספרים שלמים, טקסטי הבקשה חופשיים) והדפיסו מלבן של כוכביות עם מספר כזה של שורות ועמודות. עבור 2 ו-3 הפלט הוא שתי שורות של `***`.',
+              'קראו את הגובה ואחר כך את הרוחב (שני מספרים שלמים, טקסטי הבקשה חופשיים) והדפיסו מלבן של כוכביות עם מספר השורות והעמודות שהתקבלו. עבור 2 ו-3 הפלט הוא שתי שורות של `***`.',
             ),
           ],
           starterCode: py`

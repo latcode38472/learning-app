@@ -178,7 +178,7 @@ export const test: Assessment = {
               feedback: ['Correct. Name the error you expect so that real bugs still show themselves.', 'נכון. ציינו את השגיאה שאתם מצפים לה, כדי שבאגים אמיתיים עדיין יתגלו.'],
             }),
             opt('It is a syntax error: except always needs a type.', 'זו שגיאת תחביר: except תמיד דורש סוג.', {
-              feedback: ['A bare except is valid Python. It is a bad habit, not a syntax error.', 'except חשוף הוא פייתון תקין. זה הרגל רע, לא שגיאת תחביר.'],
+              feedback: ['A bare except is valid Python. It is a bad habit, not a syntax error.', '`except:` ריק הוא פייתון תקין. זה הרגל רע, לא שגיאת תחביר.'],
             }),
             opt('It only catches ValueError.', 'הוא תופס רק ValueError.', {
               feedback: ['The opposite: with no type it catches everything.', 'ההפך: בלי סוג הוא תופס הכול.'],

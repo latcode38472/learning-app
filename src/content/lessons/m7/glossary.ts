@@ -73,7 +73,7 @@ export const glossary: GlossaryEntry[] = [
     name: { en: 'except', he: 'בלוק except' },
     definition: {
       en: 'The block that runs when the named error type happened inside the try block just above it. Always name the type (except ValueError:); a bare except: hides bugs.',
-      he: 'הבלוק שרץ כשסוג השגיאה שצוין קרה בתוך בלוק ה-try שמעליו. תמיד ציינו את הסוג (except ValueError:); except: חשוף מסתיר באגים.',
+      he: 'הבלוק שרץ כשסוג השגיאה שצוין קרה בתוך בלוק ה-try שמעליו. תמיד ציינו את הסוג (except ValueError:); except: ריק מסתיר באגים.',
     },
     example: 'except ZeroDivisionError:\n    print("Cannot divide by zero")',
     lessonId: 'l29-try-except',

@@ -59,8 +59,8 @@ export const project: Project = {
           ]
         `, { runnable: false }),
         p(
-          'Then write a function `ask(q)` that receives one question dictionary. It prints `q["question"]`, reads the answer with `input()` (any prompt text), and returns `True` if the answer is right and `False` otherwise. Be forgiving: ignore capital letters and spaces around the answer, so that `paris` and ` Paris ` both count as right.',
-          'אחר כך כתבו פונקציה `ask(q)` שמקבלת מילון שאלה אחד. היא מדפיסה את `q["question"]`, קוראת את התשובה בעזרת `input()` (טקסט הבקשה חופשי), ומחזירה `True` אם התשובה נכונה ו-`False` אחרת. היו סלחניים: התעלמו מאותיות גדולות ומרווחים סביב התשובה, כך שגם `paris` וגם ` Paris ` ייחשבו נכונים.',
+          'Then write a function `ask(q)` that receives one question dictionary. It prints `q["question"]`, reads the answer with `input()` (any prompt text), and returns `True` if the answer is right and `False` otherwise. Be forgiving: ignore capital letters and spaces around the answer — compare the typed answer and the stored answer in lower case — so that `paris` and ` Paris ` both count as right.',
+          'אחר כך כתבו פונקציה `ask(q)` שמקבלת מילון שאלה אחד. היא מדפיסה את `q["question"]`, קוראת את התשובה בעזרת `input()` (טקסט הבקשה חופשי), ומחזירה `True` אם התשובה נכונה ו-`False` אחרת. היו סלחניים: התעלמו מאותיות גדולות ומרווחים סביב התשובה — השוו את התשובה שהוקלדה ואת התשובה השמורה כששתיהן באותיות קטנות — כך שגם `paris` וגם ` Paris ` ייחשבו נכונים.',
         ),
         term(
           '.strip()',
@@ -113,7 +113,7 @@ export const project: Project = {
                   r = ask(q2)
               finally:
                   builtins.input = saved
-              assert r is True, "ask(q) must ignore capital letters: compare with .lower()."
+              assert r is True, "ask(q) must ignore capital letters: apply .lower() to both the typed answer and q['answer']."
             `,
             { stdin: answerLines, name: ['ask(q) returns True or False', 'ask(q) מחזירה True או False'] },
           ),

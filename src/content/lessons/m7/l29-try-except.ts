@@ -89,7 +89,7 @@ export const lesson: Lesson = {
       'warning',
       'You can write `except:` with no error type, and it catches **everything**. Do not. If you misspell a variable inside that `try` block, the NameError is caught too, the message says "not a number", and you never see the traceback that would have shown you the bug. Always name the error you expect: `except ValueError:`.',
       'אפשר לכתוב `except:` בלי סוג שגיאה, וזה תופס **הכול**. אל תעשו את זה. אם תטעו באיות של משתנה בתוך בלוק ה-`try` הזה, גם ה-NameError ייתפס, ההודעה תגיד "not a number", ולעולם לא תראו את ה-traceback שהיה מראה לכם את הבאג. תמיד ציינו את השגיאה שאתם מצפים לה: `except ValueError:`.',
-      t('A bare except hides bugs', 'except חשוף מסתיר באגים'),
+      t('A bare except hides bugs', '`except:` ריק מסתיר באגים'),
     ),
     h('The validation loop', 'לולאת אימות הקלט'),
     p(
@@ -143,11 +143,11 @@ export const lesson: Lesson = {
   simpler: [
     p(
       'Think of a cashier scanning items. The normal plan is "scan the barcode". Sometimes a barcode will not scan; for exactly that case there is a backup plan: "type the number by hand". The shop does not close because one barcode failed.',
-      'חשבו על קופאי שסורק מוצרים. התוכנית הרגילה היא "לסרוק את הברקוד". לפעמים ברקוד לא נסרק; בדיוק למקרה הזה יש תוכנית גיבוי: "להקליד את המספר ביד". החנות לא נסגרת בגלל ברקוד אחד שנכשל.',
+      'חשבו על קופאי שסורק מוצרים. המסלול הרגיל הוא "לסרוק את הברקוד". לפעמים ברקוד לא נסרק; בדיוק למקרה הזה יש תוכנית גיבוי: "להקליד את המספר ביד". החנות לא נסגרת בגלל ברקוד אחד שנכשל.',
     ),
     p(
       '`try` is the normal plan. `except ValueError` is the backup plan for one specific problem. Without a backup plan, Python does the only thing it can: it stops and shows the traceback.',
-      '`try` הוא התוכנית הרגילה. `except ValueError` הוא תוכנית הגיבוי לבעיה מסוימת אחת. בלי תוכנית גיבוי, פייתון עושה את הדבר היחיד שהוא יכול: עוצר ומציג את ה-traceback.',
+      '`try` הוא המסלול הרגיל. `except ValueError` הוא תוכנית הגיבוי לבעיה מסוימת אחת. בלי תוכנית גיבוי, פייתון עושה את הדבר היחיד שהוא יכול: עוצר ומציג את ה-traceback.',
     ),
     p(
       'The validation loop is simply "ask again until you get an answer you can use". You do it every day: if someone mumbles their phone number, you ask them to repeat it; you do not walk away.',
@@ -458,17 +458,17 @@ export const lesson: Lesson = {
       'l29-c2',
       [
         'Why should you write `except ValueError:` rather than a bare `except:`?',
-        'למה כדאי לכתוב `except ValueError:` ולא `except:` חשוף?',
+        'למה כדאי לכתוב `except ValueError:` ולא `except:` ריק, בלי סוג שגיאה?',
       ],
       [
-        opt('A bare except also hides bugs such as a NameError, so you would never see their tracebacks.', 'except חשוף מסתיר גם באגים כמו NameError, ולכן לעולם לא תראו את ה-traceback שלהם.', {
+        opt('A bare except also hides bugs such as a NameError, so you would never see their tracebacks.', '`except:` ריק מסתיר גם באגים כמו NameError, ולכן לעולם לא תראו את ה-traceback שלהם.', {
           correct: true,
           feedback: ['Exactly. Catch only the error you expect; let real bugs show themselves.', 'בדיוק. תפסו רק את השגיאה שאתם מצפים לה; תנו לבאגים אמיתיים להתגלות.'],
         }),
-        opt('A bare except is a syntax error.', 'except חשוף הוא שגיאת תחביר.', {
+        opt('A bare except is a syntax error.', '`except:` ריק הוא שגיאת תחביר.', {
           feedback: ['It is valid Python; it is just a bad habit, because it catches everything.', 'זה פייתון תקין; זה פשוט הרגל רע, כי הוא תופס הכול.'],
         }),
-        opt('A bare except only works inside functions.', 'except חשוף עובד רק בתוך פונקציות.', {
+        opt('A bare except only works inside functions.', '`except:` ריק עובד רק בתוך פונקציות.', {
           feedback: ['It works anywhere. The problem is what it catches, not where it can be written.', 'הוא עובד בכל מקום. הבעיה היא מה הוא תופס, לא איפה אפשר לכתוב אותו.'],
         }),
         opt('except ValueError makes the program run faster.', 'except ValueError גורם לתוכנית לרוץ מהר יותר.', {
@@ -505,14 +505,14 @@ export const lesson: Lesson = {
   recap: [
     list([
       ['`try:` runs a block; if a line raises an exception, the rest of the block is skipped.', '`try:` מריץ בלוק; אם שורה מעלה חריגה, שאר הבלוק מדולג.'],
-      ['`except ValueError:` runs only for that error type, then the program continues. Name the type; a bare `except:` hides bugs.', '`except ValueError:` רץ רק עבור סוג השגיאה הזה, ואז התוכנית ממשיכה. ציינו את הסוג; `except:` חשוף מסתיר באגים.'],
+      ['`except ValueError:` runs only for that error type, then the program continues. Name the type; a bare `except:` hides bugs.', '`except ValueError:` רץ רק עבור סוג השגיאה הזה, ואז התוכנית ממשיכה. ציינו את הסוג; `except:` ריק מסתיר באגים.'],
       ['Validation loop: `while True:`, read, `try` to convert, `break` on success, message in `except`.', 'לולאת אימות קלט: `while True:`, קריאה, `try` להמרה, `break` בהצלחה, הודעה ב-`except`.'],
       ['Several `except` blocks handle several error types; the first matching one runs.', 'כמה בלוקים של `except` מטפלים בכמה סוגי שגיאות; הראשון שמתאים רץ.'],
       ['Catch only errors you expect and can handle. A bug deserves its traceback.', 'תפסו רק שגיאות שאתם מצפים להן ויכולים לטפל בהן. באג ראוי ל-traceback שלו.'],
     ]),
     p(
       'You now have both halves of working with errors: reading them when they are yours, and catching them when they come from outside. Programs that survive bad input feel finished in a way that fragile ones never do.',
-      'עכשיו יש לכם את שני החצאים של עבודה עם שגיאות: לקרוא אותן כשהן שלכם, ולתפוס אותן כשהן מגיעות מבחוץ. תוכניות ששורדות קלט לא תקין מרגישות גמורות באופן שתוכניות שבירות לעולם לא מרגישות.',
+      'עכשיו יש לכם את שני החצאים של עבודה עם שגיאות: לקרוא אותן כשהן שלכם, ולתפוס אותן כשהן מגיעות מבחוץ. תוכניות ששורדות קלט לא תקין נראות מוגמרות באופן שתוכניות שבירות לעולם לא ייראו.',
     ),
   ],
   next: t(

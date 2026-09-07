@@ -56,8 +56,8 @@ export const lesson: Lesson = {
           print(i)
     `, { output: '0\n1\n2\n3\n4' }),
     p(
-      'The variable `i` is the **loop variable**: it holds the current number of the round. You choose its name like any variable; `i` is a common choice for a simple count, but `day` or `row` is clearer when the number means something. Compare this with the same program written with while: four lines become two, and there is no counter to forget.',
-      'המשתנה `i` הוא **משתנה הלולאה** (loop variable): הוא מחזיק את המספר של הסיבוב הנוכחי. את שמו אתם בוחרים כמו לכל משתנה; `i` הוא בחירה נפוצה לספירה פשוטה, אבל `day` או `row` ברור יותר כשלמספר יש משמעות. השוו עם אותה תוכנית שנכתבה עם while: ארבע שורות הופכות לשתיים, ואין מונה שאפשר לשכוח.',
+      'The variable `i` is the **loop variable**: it holds the number that `range` produced for the current round. You choose its name like any variable; `i` is a common choice for a simple count, but `day` or `row` is clearer when the number means something. Compare this with the same program written with while: four lines become two, and there is no counter to forget.',
+      'המשתנה `i` הוא **משתנה הלולאה** (loop variable): הוא מחזיק את המספר ש-`range` ייצר עבור הסיבוב הנוכחי. את שמו אתם בוחרים כמו לכל משתנה; `i` הוא בחירה נפוצה לספירה פשוטה, אבל `day` או `row` ברור יותר כשלמספר יש משמעות. השוו עם אותה תוכנית שנכתבה עם while: ארבע שורות הופכות לשתיים, ואין מונה שאפשר לשכוח.',
     ),
     code(py`
       i = 0
@@ -82,7 +82,7 @@ export const lesson: Lesson = {
     callout(
       'note',
       'To print 1 to 10 you need range(1, 11). Forgetting that the stop value is left out is the most common range mistake; when a loop stops one short, check the stop value first.',
-      'כדי להדפיס מ-1 עד 10 צריך `range(1, 11)`. לשכוח שערך העצירה לא נכלל היא הטעות הנפוצה ביותר עם range; כשלולאה עוצרת אחד מוקדם מדי, בדקו קודם את ערך העצירה.',
+      'כדי להדפיס מ-1 עד 10 צריך `range(1, 11)`. הטעות הנפוצה ביותר עם range היא לשכוח שערך העצירה לא נכלל; כשלולאה עוצרת אחד מוקדם מדי, בדקו קודם את ערך העצירה.',
       t('One short', 'אחד פחות'),
     ),
     callout(
@@ -256,7 +256,7 @@ export const lesson: Lesson = {
     instructions: [
       p(
         'Build a times-table printer. Read a whole number (any prompt text) and print its table from 1 to 10: ten lines in the exact shape `7 x 1 = 7`, `7 x 2 = 14`, and so on up to `7 x 10 = 70`. Use a for loop and an f-string; do not write ten print lines.',
-        'בנו מדפסת של לוח כפל. קראו מספר שלם (טקסט הבקשה חופשי) והדפיסו את לוח הכפל שלו מ-1 עד 10: עשר שורות בצורה המדויקת `7 x 1 = 7`, `7 x 2 = 14`, וכן הלאה עד `7 x 10 = 70`. השתמשו בלולאת for וב-f-string; אל תכתבו עשר שורות print.',
+        'בנו תוכנית שמדפיסה לוח כפל.קראו מספר שלם (טקסט הבקשה חופשי) והדפיסו את לוח הכפל שלו מ-1 עד 10: עשר שורות בצורה המדויקת `7 x 1 = 7`, `7 x 2 = 14`, וכן הלאה עד `7 x 10 = 70`. השתמשו בלולאת for וב-f-string; אל תכתבו עשר שורות print.',
       ),
       code('7 x 1 = 7\n7 x 2 = 14\n7 x 3 = 21\n...\n7 x 10 = 70', { lang: 'text', runnable: false }),
     ],
@@ -336,10 +336,10 @@ export const lesson: Lesson = {
       [
         opt('A while loop, because you do not know in advance how many answers there will be.', 'לולאת while, כי אתם לא יודעים מראש כמה תשובות יהיו.', {
           correct: true,
-          feedback: ['Yes. Repeating until something happens is exactly what while is for.', 'כן. לחזור עד שמשהו קורה זה בדיוק מה ש-while נועד לו.'],
+          feedback: ['Yes. Repeating until something happens is exactly what while is for.', 'כן. לחזור עד שמשהו קורה — בדיוק לזה נועדה while.'],
         }),
         opt('A for loop with range(100), because 100 answers should be enough.', 'לולאת for עם `range(100)`, כי 100 תשובות אמורות להספיק.', {
-          feedback: ['A for loop runs a fixed number of rounds. It cannot stop early when the user types quit, and it may not be enough.', 'לולאת for רצה מספר קבוע של סיבובים. היא לא יכולה לעצור מוקדם כשהמשתמש מקליד quit, וייתכן שלא תספיק.'],
+          feedback: ['A for loop is built for a fixed number of rounds: stopping when the user types quit would need extra work, and 100 may not be enough.', 'לולאת for בנויה למספר קבוע של סיבובים: כדי לעצור כשהמשתמש מקליד quit היא תצטרך עבודה נוספת, ו-100 אולי לא יספיקו.'],
         }),
         opt('Neither: only an if statement can check what the user typed.', 'אף אחת מהן: רק משפט if יכול לבדוק מה המשתמש הקליד.', {
           feedback: ['The while condition checks the answer itself: `while answer != "quit":`.', 'התנאי של while בודק את התשובה בעצמו: `while answer != "quit":`.'],
@@ -354,7 +354,7 @@ export const lesson: Lesson = {
       ['`for i in range(n):` runs the block once for each of the numbers 0 to n - 1.', '`for i in range(n):` מריץ את הבלוק פעם אחת עבור כל אחד מהמספרים 0 עד n - 1.'],
       ['`range(start, stop)` begins at start; `range(start, stop, step)` jumps by step, which may be negative.', '`range(start, stop)` מתחיל ב-start; `range(start, stop, step)` קופץ ב-step, שיכול להיות שלילי.'],
       ['The stop value is never produced: to reach 10 write `range(1, 11)`.', 'ערך העצירה אף פעם לא מיוצר: כדי להגיע ל-10 כתבו `range(1, 11)`.'],
-      ['The loop variable holds the number of the current round and can be used in the block.', 'משתנה הלולאה מחזיק את המספר של הסיבוב הנוכחי ואפשר להשתמש בו בבלוק.'],
+      ['The loop variable holds the number `range` produced for the current round and can be used in the block.', 'משתנה הלולאה מחזיק את המספר ש-`range` ייצר לסיבוב הנוכחי, ואפשר להשתמש בו בבלוק.'],
       ['for is for a known number of rounds; while is for repeating until something happens.', 'for מתאימה למספר ידוע של סיבובים; while מתאימה לחזרה עד שמשהו קורה.'],
     ]),
     p(

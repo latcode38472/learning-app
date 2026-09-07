@@ -378,13 +378,13 @@ export const lesson: Lesson = {
           correct: true,
           feedback: ['Yes. In Python, indentation is not decoration: it defines the block.', 'כן. בפייתון ההזחה אינה קישוט: היא מגדירה את הבלוק.'],
         }),
-        opt('They only make the code look nicer; Python ignores them.', 'הן רק גורמות לקוד להיראות יפה יותר; פייתון מתעלם מהן.', {
+        opt('They only make the code look nicer; Python ignores them.', 'הם רק גורמים לקוד להיראות יפה יותר; פייתון מתעלם מהם.', {
           feedback: ['Python reads the indentation. Without it you get an IndentationError.', 'פייתון קורא את ההזחה. בלעדיה מתקבלת שגיאת IndentationError.'],
         }),
-        opt('They are needed only after else, not after if.', 'הן נחוצות רק אחרי else, לא אחרי if.', {
+        opt('They are needed only after else, not after if.', 'הם נחוצים רק אחרי else, לא אחרי if.', {
           feedback: ['Both if and else are followed by an indented block.', 'גם אחרי if וגם אחרי else מגיע בלוק מוזח.'],
         }),
-        opt('They print four spaces before the output.', 'הן מדפיסות ארבעה רווחים לפני הפלט.', {
+        opt('They print four spaces before the output.', 'הם מדפיסים ארבעה רווחים לפני הפלט.', {
           feedback: ['Indentation is part of the code layout; it never appears in the output.', 'ההזחה היא חלק ממבנה הקוד; היא אף פעם לא מופיעה בפלט.'],
         }),
       ],
@@ -418,7 +418,7 @@ export const lesson: Lesson = {
       ['The colon ends the `if` line; the block below it is indented by four spaces.', 'הנקודתיים מסיימות את שורת ה-`if`; הבלוק שמתחתיה מוזח בארבעה רווחים.'],
       ['The first unindented line after the block runs in every case.', 'השורה הראשונה שאינה מוזחת אחרי הבלוק רצה בכל מקרה.'],
       ['`else:` holds the block for when the condition is `False`; exactly one of the two blocks runs.', '`else:` מחזיק את הבלוק למקרה שהתנאי הוא `False`; בדיוק אחד משני הבלוקים רץ.'],
-      ['A missing colon, a missing indentation, or `=` instead of `==` — the error message tells you which.', 'נקודתיים חסרות, הזחה חסרה, או `=` במקום `==` — הודעת השגיאה אומרת לכם מה מהם.'],
+      ['A missing colon, a missing indentation, or `=` instead of `==` — the error message tells you which.', 'נקודתיים חסרות, הזחה חסרה, או `=` במקום `==` — הודעת השגיאה אומרת לכם במה מדובר.'],
     ]),
     p(
       'Your programs can now take two different paths. That is the heart of every game, form and app: look at a value, decide, act.',

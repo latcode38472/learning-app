@@ -48,7 +48,7 @@ export const lesson: Lesson = {
     term(
       'string',
       'Text inside quotes is called a **string**: a row of characters — letters, digits, spaces and punctuation. Python does not try to understand a string; it carries it exactly as you typed it, and the quotes themselves are not printed.',
-      'טקסט בתוך מירכאות נקרא **מחרוזת** (string): שורה של תווים — אותיות, ספרות, רווחים וסימני פיסוק. פייתון לא מנסה להבין מחרוזת; הוא נושא אותה בדיוק כפי שהקלדתם, והמירכאות עצמן לא מודפסות.',
+      'טקסט בתוך מירכאות נקרא **מחרוזת** (string): רצף של תווים — אותיות, ספרות, רווחים וסימני פיסוק. פייתון לא מנסה להבין מחרוזת; הוא מעביר אותה הלאה בדיוק כפי שהקלדתם, והמירכאות עצמן לא מודפסות.',
     ),
     code(py`
       print("Hello, World!")
@@ -115,7 +115,7 @@ export const lesson: Lesson = {
     ),
     p(
       'A comma between two things inside print means: say this, take a small breath (a space), then say that.',
-      'פסיק בין שני דברים בתוך `print` פירושו: תגיד את זה, קח נשימה קטנה (רווח), ואז תגיד את זה.',
+      'פסיק בין שני דברים בתוך `print` פירושו: אמור את הראשון, קח נשימה קטנה (רווח), ואז אמור את השני.',
     ),
     p(
       'A line that starts with `#` is like a sticky note on the fridge. It is for the people who read the code; the computer walks right past it.',
@@ -237,7 +237,7 @@ export const lesson: Lesson = {
       tests: [outputTest('Hello\nIt\'s me\nBye')],
     },
     hints: [
-      ['Python reports the first problem it finds. On line 2 the apostrophe closes the string too early — wrap that text in double quotes.', 'פייתון מדווח על הבעיה הראשונה שהוא מוצא. בשורה 2 הגרש סוגר את המחרוזת מוקדם מדי — עטפו את הטקסט הזה במירכאות כפולות.'],
+      ['Python reports the first problem it finds — not necessarily on line 1. On line 2 the apostrophe in It\'s is read as the end of the string. Which kind of quotes would fix that?', 'פייתון מדווח על הבעיה הראשונה שהוא מוצא — והיא לא בהכרח בשורה 1. בשורה 2 הגרש שבתוך It\'s נקרא כסיום המחרוזת. איזה סוג מירכאות יפתור את זה?'],
       ['NameError on line 1 means Python looked for something called Hello. Text needs quotes.', 'NameError בשורה 1 פירושו שפייתון חיפש משהו שנקרא Hello. טקסט צריך מירכאות.'],
       ['A line that starts with `#` is a comment and never runs. Remove the `#` so the last line prints.', 'שורה שמתחילה ב-`#` היא הערה ואף פעם לא רצה. הסירו את ה-`#` כדי שהשורה האחרונה תודפס.'],
     ],
