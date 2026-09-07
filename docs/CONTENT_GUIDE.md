@@ -239,6 +239,26 @@ export const lesson: Lesson = {
 Ids: exercise `lNN-ex`, build `lNN-build`, harder challenge `lNN-hard`,
 check questions `lNN-c1`, `lNN-c2`…
 
+## 7b. Lessons learned from the first release
+
+* The `py` tagged template uses raw strings: inside `py\`…\``, write `"\n"` for a
+  Python newline escape (it reaches Python unchanged). Do not double the
+  backslash.
+* Explanation sections may exceed 9 blocks when a lesson introduces several
+  concept ids that each need a `term()` card; keep each block short instead of
+  dropping cards.
+* `{{term-id}}` glossary references render as a term with a tooltip; using
+  **bold** with the English original in parentheses on first mention is an
+  acceptable alternative (the reference lesson does this).
+* A snippet that intentionally raises an error must not contain `print(` and
+  must not declare `output` (the validator executes runnable Python blocks);
+  show the traceback in a following `lang: 'text'` block.
+* `functionTest` runs the program first with no input, so programs that call
+  `input()` at top level cannot use it — use `pythonTest` with `stdin` and call
+  `ns['fn'](…)` directly instead.
+* The grading sandbox seeds `random` per run; tests must never assert exact
+  random values.
+
 ## 8. Quality checklist before you finish a lesson
 
 - [ ] All eight sections present, in order, both languages everywhere.

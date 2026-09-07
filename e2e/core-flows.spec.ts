@@ -192,10 +192,10 @@ test.describe('CodePath core flows', () => {
     await page.reload();
     await page.goto('/#/project/p-guessing-game');
     await expect(page.getByTestId('project-p-guessing-game')).toBeVisible();
-    await setEditor(page, 'project', 'import random\nsecret = random.randint(1, 100)\nprint("I am thinking of a number between 1 and 100.")');
+    await setEditor(page, 'project-p-guessing-game', 'import random\nsecret = random.randint(1, 100)\nprint("I am thinking of a number between 1 and 100.")');
     await page.getByTestId('project-check-step').click();
     await expect(page.getByTestId('project-p-guessing-game')).toContainText(/All checks passed|did not pass/, { timeout: 90_000 });
     await page.reload();
-    await expect(page.getByTestId('project').locator('.cm-content')).toContainText('random.randint');
+    await expect(page.getByTestId('project-p-guessing-game').locator('.cm-content').first()).toContainText('random.randint');
   });
 });
