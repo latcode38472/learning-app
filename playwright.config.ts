@@ -22,11 +22,15 @@ export default defineConfig({
     ...devices['Desktop Chrome'],
     launchOptions: executablePath ? { executablePath } : {},
   },
-  webServer: {
-    command: 'npm run build && npm run preview -- --host 127.0.0.1 --port 4173',
-    url: 'http://127.0.0.1:4173',
-    reuseExistingServer: !process.env.CI,
-    timeout: 240_000,
-  },
+  // When E2E_BASE_URL points at a server that is already running (a sub-path
+  // build, or a production artifact being checked), don't start another one.
+  webServer: process.env.E2E_BASE_URL
+    ? undefined
+    : {
+        command: 'npm run build && npm run preview -- --host 127.0.0.1 --port 4173',
+        url: 'http://127.0.0.1:4173',
+        reuseExistingServer: !process.env.CI,
+        timeout: 240_000,
+      },
   projects: [{ name: 'chromium' }],
 });

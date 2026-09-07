@@ -1,0 +1,36 @@
+# Netlify deployment for CodePath.
+#
+# The repository can stay private; Netlify builds it and serves the result at a
+# public URL. Connect it once at https://app.netlify.com -> Add new site ->
+# Import an existing project -> GitHub -> latcode38472/learning-app. Netlify
+# reads everything below, so there is nothing to fill in by hand.
+#
+# The site is served from the domain root, so VITE_BASE is left unset (it
+# defaults to "/"). Only a sub-path host like GitHub Pages needs it.
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  # The build needs Node 20 or newer; pin it so a Netlify default change
+  # cannot break the build silently.
+  NODE_VERSION = "22"
+
+# Routing is hash-based (/#/lesson/...), so every real request is for a file
+# that exists. No SPA fallback rule is defined on purpose: a catch-all would
+# turn a genuinely missing asset into a 200 with HTML, which hides real errors.
+
+# Vite fingerprints these filenames, so a changed file always has a new name.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# The Python runtime keeps stable filenames across builds but only changes when
+# the Pyodide version does, so cache it hard but let it revalidate weekly.
+# This is the difference between a ~13 MB download once and on every visit.
+[[headers]]
+  for = "/pyodide/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"

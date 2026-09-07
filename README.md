@@ -89,10 +89,25 @@ npm run build && npm run preview &
 E2E_BASE_URL=http://127.0.0.1:4173/learning-app/ npm run test:e2e
 ```
 
-## Publishing it on the web (GitHub Pages)
+## Publishing it on the web
 
-The app is a static site, so it can be hosted anywhere that serves files. A
-workflow for GitHub Pages is included at `.github/workflows/deploy-pages.yml`.
+The app is a static site, so it can be hosted anywhere that serves files.
+Two ready-made setups are included.
+
+### Netlify (works with a private repository)
+
+`netlify.toml` holds the whole configuration. Connect it once at
+[app.netlify.com](https://app.netlify.com) → **Add new site → Import an
+existing project → GitHub → this repository**; Netlify reads the build command,
+publish directory, Node version and cache headers from that file, so there is
+nothing to type in. Every push to the connected branch rebuilds and republishes.
+The repository stays private; the published site is public at its
+`*.netlify.app` address (Cloudflare Pages and Vercel work the same way with the
+same two settings: build `npm run build`, publish `dist`).
+
+### GitHub Pages (needs a public repository, or a paid plan)
+
+A workflow is included at `.github/workflows/deploy-pages.yml`.
 
 One-time setup: in the repository, **Settings → Pages → Build and deployment →
 Source: GitHub Actions**. After that, every push to `main` (or to the
@@ -102,7 +117,13 @@ Actions tab. Nothing else needs configuring — the workflow installs
 dependencies, copies the Python runtime into the bundle, builds with the right
 sub-path, and uploads the result.
 
-To host it somewhere else, build it yourself and serve the `dist/` folder:
+Note that GitHub only offers Pages for a private repository on paid plans; on a
+free account the Pages settings page offers "Upgrade or make this repository
+public" instead. Use Netlify above if the repository should stay private.
+
+### Any other host
+
+Build it yourself and serve the `dist/` folder:
 
 ```bash
 npm run build                      # serves from the domain root
