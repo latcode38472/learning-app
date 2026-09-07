@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { Question } from '@/content/schema';
-import { assessments, conceptToLesson, glossaryById, lessonOrder, lessons } from '@/content';
+import { assessments, conceptToLesson, glossaryById, lessonOrder, lessons, moduleById } from '@/content';
 import { useI18n } from '@/i18n';
 import { useStore } from '@/state/store';
 import { daysUntil, isDue, isWeak } from '@/state/review';
@@ -52,7 +52,12 @@ export function ReviewPage() {
   const [finished, setFinished] = useState<QuizAnswer[] | null>(null);
 
   const due = useMemo(() => new Set(Object.entries(progress.concepts).filter(([, s]) => isDue(s)).map(([id]) => id)), [progress.concepts]);
-  const completedLessons = useMemo(() => new Set(Object.entries(progress.lessons).filter(([, lp]) => lp.status === 'completed').map(([id]) => id)), [progress.lessons]);
+  // Lessons that count as "learned": completed ones, plus every lesson of a module the learner tested out of.
+  const completedLessons = useMemo(() => {
+    const done = new Set(Object.entries(progress.lessons).filter(([, lp]) => lp.status === 'completed').map(([id]) => id));
+    for (const mid of progress.testedOut) for (const id of moduleById[mid]?.lessonIds ?? []) done.add(id);
+    return done;
+  }, [progress.lessons, progress.testedOut]);
   const [questions, setQuestions] = useState<Question[]>([]);
   const weak = Object.entries(progress.concepts).filter(([, s]) => isWeak(s));
   const nextDue = Object.values(progress.concepts)
