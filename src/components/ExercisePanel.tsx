@@ -66,7 +66,6 @@ export function ExercisePanel({ exercise, exam, onResult, heading, draftKey, tes
   const [attempts, setAttempts] = useState(0);
   const recordedFirst = useRef(false);
   const passRecorded = useRef(false);
-  const saveTimer = useRef<number | null>(null);
 
   // Reset local state when the exercise changes.
   useEffect(() => {
@@ -80,14 +79,12 @@ export function ExercisePanel({ exercise, exam, onResult, heading, draftKey, tes
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [exercise.id, key]);
 
-  // Debounced draft saving.
-  useEffect(() => {
-    if (saveTimer.current) window.clearTimeout(saveTimer.current);
-    saveTimer.current = window.setTimeout(() => saveDraft(key, code), 400);
-    return () => {
-      if (saveTimer.current) window.clearTimeout(saveTimer.current);
-    };
-  }, [code, key, saveDraft]);
+  // Persist in the edit event so navigating, reloading, or suspending a mobile
+  // tab immediately after typing cannot cancel the last draft save.
+  const updateCode = (value: string) => {
+    saveDraft(key, value);
+    setCode(value);
+  };
 
   const hintsAllowed = exam ? exam.hintsAllowed : exercise.hints.length;
   const hintsAvailable = Math.min(hintsAllowed, exercise.hints.length);
@@ -149,7 +146,7 @@ export function ExercisePanel({ exercise, exam, onResult, heading, draftKey, tes
       </div>
       <Workbench
         code={code}
-        onCodeChange={setCode}
+        onCodeChange={updateCode}
         starterCode={starter}
         sampleStdin={exercise.sampleStdin}
         fileName={exercise.id}

@@ -19,8 +19,6 @@ export default defineConfig({
     // E2E_BASE_URL=http://127.0.0.1:4173/learning-app/
     baseURL: process.env.E2E_BASE_URL ?? 'http://127.0.0.1:4173/',
     trace: 'retain-on-failure',
-    ...devices['Desktop Chrome'],
-    launchOptions: executablePath ? { executablePath } : {},
   },
   // When E2E_BASE_URL points at a server that is already running (a sub-path
   // build, or a production artifact being checked), don't start another one.
@@ -32,5 +30,10 @@ export default defineConfig({
         reuseExistingServer: !process.env.CI,
         timeout: 240_000,
       },
-  projects: [{ name: 'chromium' }],
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'], launchOptions: executablePath ? { executablePath } : {} } },
+    { name: 'webkit', use: { ...devices['Desktop Safari'] } },
+    { name: 'iphone', use: { ...devices['iPhone 13'] } },
+    { name: 'android', use: { ...devices['Pixel 5'], launchOptions: executablePath ? { executablePath } : {} } },
+  ],
 });

@@ -3,30 +3,13 @@
  * build in a real browser (Python executes in the Pyodide worker).
  */
 import { expect, test, type Page } from '@playwright/test';
+import { setEditor } from './editor';
 
 async function onboard(page: Page, lang: 'en' | 'he' = 'en') {
   await page.goto('#/welcome');
   await page.getByTestId(`lang-${lang}`).click();
   await page.getByTestId('onboarding-start').click();
   await expect(page.getByTestId('home')).toBeVisible();
-}
-
-async function setEditor(page: Page, prefix: string, code: string) {
-  const editor = page.getByTestId(prefix).locator('.cm-content').first();
-  await editor.click();
-  await page.keyboard.press('Control+A');
-  await page.keyboard.press('Delete');
-  // Type line by line so CodeMirror's auto-indent does not add extra spaces.
-  const lines = code.split('\n');
-  for (let i = 0; i < lines.length; i += 1) {
-    if (i > 0) {
-      await page.keyboard.press('Enter');
-      await page.keyboard.press('Home');
-      await page.keyboard.press('Shift+End');
-      await page.keyboard.press('Delete');
-    }
-    await page.keyboard.type(lines[i]);
-  }
 }
 
 test.describe('CodePath core flows', () => {
