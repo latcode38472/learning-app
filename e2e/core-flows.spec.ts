@@ -3,25 +3,13 @@
  * build in a real browser (Python executes in the Pyodide worker).
  */
 import { expect, test, type Page } from '@playwright/test';
+import { setEditor } from './editor';
 
 async function onboard(page: Page, lang: 'en' | 'he' = 'en') {
   await page.goto('#/welcome');
   await page.getByTestId(`lang-${lang}`).click();
   await page.getByTestId('onboarding-start').click();
   await expect(page.getByTestId('home')).toBeVisible();
-}
-
-async function setEditor(page: Page, prefix: string, code: string) {
-  const editor = page.getByTestId(prefix).locator('.cm-content').first();
-  await editor.click();
-  await page.keyboard.press('ControlOrMeta+A');
-  // Insert the whole document in one edit; mobile browsers handle Home/End
-  // and contenteditable fill differently from desktop browsers.
-  await page.keyboard.insertText(code);
-  await expect.poll(async () => page.evaluate(() => {
-    const state = JSON.parse(localStorage.getItem('codepath.v1')!).state;
-    return [...Object.values(state.progress.drafts), ...Object.values(state.progress.projects).map((p) => (p as { code: string }).code)];
-  }), { timeout: 5_000 }).toContain(code);
 }
 
 test.describe('CodePath core flows', () => {

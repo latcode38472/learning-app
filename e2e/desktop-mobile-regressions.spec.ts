@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { setEditor } from './editor';
 
 const lessonPath = '#/lesson/l01-what-computers-do';
 
@@ -57,8 +58,7 @@ test('an edit is saved before an immediate reload', async ({ page }) => {
 
 test('empty interactive answers survive later prompts and reruns', async ({ page }) => {
   await openLesson(page);
-  const editor = page.getByTestId('exercise').locator('.cm-content').first();
-  await editor.fill('first = input("First? ")\nsecond = input("Second? ")\nprint(repr(first), repr(second))');
+  await setEditor(page, 'exercise', 'first = input("First? ")\nsecond = input("Second? ")\nprint(repr(first), repr(second))');
   const run = page.getByTestId('exercise-run');
   const input = page.getByTestId('exercise-need-input');
   const output = page.getByTestId('exercise-console');
