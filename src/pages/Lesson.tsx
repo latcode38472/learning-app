@@ -14,6 +14,7 @@ import { Inline } from '@/components/InlineText';
 import { QuizRunner, isPredictCorrect, type QuizAnswer } from '@/components/QuizRunner';
 import { Badge, Notice, useDocumentTitle } from '@/components/ui';
 import { NotFoundPage } from './NotFound';
+import { PageAnchor } from '@/components/PageAnchor';
 
 export function LessonPage() {
   const { lessonId = '' } = useParams();
@@ -146,7 +147,7 @@ function LessonView({ lesson }: { lesson: Lesson }) {
         </header>
 
         {/* 1. Objective */}
-        <section className="card lesson-section" id="objective" aria-labelledby="h-objective">
+        <section className="card lesson-section" tabIndex={-1} id="objective" aria-labelledby="h-objective">
           <Head n={1} id="h-objective" />
           <p>
             <strong>
@@ -166,7 +167,7 @@ function LessonView({ lesson }: { lesson: Lesson }) {
         </section>
 
         {/* 2. Explanation */}
-        <section className="card lesson-section" id="explanation" aria-labelledby="h-explanation">
+        <section className="card lesson-section" tabIndex={-1} id="explanation" aria-labelledby="h-explanation">
           <Head n={2} id="h-explanation" />
           <Blocks blocks={lesson.explanation} />
           <button type="button" className="btn btn-sm" onClick={() => setShowSimpler((s) => !s)} aria-expanded={showSimpler} data-testid="explain-simpler">
@@ -180,7 +181,7 @@ function LessonView({ lesson }: { lesson: Lesson }) {
         </section>
 
         {/* 3. Worked example */}
-        <section className="card lesson-section" id="example" aria-labelledby="h-example">
+        <section className="card lesson-section" tabIndex={-1} id="example" aria-labelledby="h-example">
           <Head n={3} id="h-example" />
           <Blocks blocks={lesson.workedExample} />
           {lesson.moreExamples.slice(0, examplesShown).map((ex, i) => (
@@ -210,7 +211,7 @@ function LessonView({ lesson }: { lesson: Lesson }) {
         </section>
 
         {/* 4. Predict */}
-        <section className="card lesson-section" id="predict" aria-labelledby="h-predict">
+        <section className="card lesson-section" tabIndex={-1} id="predict" aria-labelledby="h-predict">
           <Head n={4} id="h-predict" />
           <PredictSection
             lesson={lesson}
@@ -222,19 +223,19 @@ function LessonView({ lesson }: { lesson: Lesson }) {
         </section>
 
         {/* 5. Exercise */}
-        <section className="card lesson-section" id="exercise" aria-labelledby="h-exercise">
+        <section className="card lesson-section" tabIndex={-1} id="exercise" aria-labelledby="h-exercise">
           <Head n={5} id="h-exercise" />
           <ExercisePanel exercise={lesson.exercise} testIdPrefix="exercise" />
         </section>
 
         {/* 6. Build */}
-        <section className="card lesson-section" id="build" aria-labelledby="h-build">
+        <section className="card lesson-section" tabIndex={-1} id="build" aria-labelledby="h-build">
           <Head n={6} id="h-build" />
           <ExercisePanel exercise={lesson.build} testIdPrefix="build" />
         </section>
 
         {/* 7. Understanding check */}
-        <section className="card lesson-section" id="check" aria-labelledby="h-check">
+        <section className="card lesson-section" tabIndex={-1} id="check" aria-labelledby="h-check">
           <Head n={7} id="h-check" />
           {checkResult ? (
             <Notice tone={checkResult.every((a) => a.correct) ? 'success' : 'warning'}>
@@ -263,7 +264,7 @@ function LessonView({ lesson }: { lesson: Lesson }) {
         </section>
 
         {/* 8. Recap */}
-        <section className="card lesson-section" id="recap" aria-labelledby="h-recap">
+        <section className="card lesson-section" tabIndex={-1} id="recap" aria-labelledby="h-recap">
           <Head n={8} id="h-recap" />
           <Blocks blocks={lesson.recap} />
           <div className="callout callout-why">
@@ -314,12 +315,12 @@ function LessonView({ lesson }: { lesson: Lesson }) {
         <ol className="toc">
           {sections.map((s, i) => (
             <li key={s.id}>
-              <a href={`#${s.id}`}>
+              <PageAnchor target={s.id}>
                 <span className={`dot${s.done && i >= 3 ? ' done' : ''}`} aria-hidden="true" />
                 <span>
                   {i + 1}. {s.label}
                 </span>
-              </a>
+              </PageAnchor>
             </li>
           ))}
         </ol>

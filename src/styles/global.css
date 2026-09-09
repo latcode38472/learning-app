@@ -293,6 +293,7 @@ pre code {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  flex-wrap: wrap;
 }
 .brand {
   display: flex;
@@ -358,6 +359,8 @@ pre code {
     padding: 0.5rem var(--space) 0.75rem;
     flex-direction: column;
     box-shadow: var(--shadow);
+    max-height: calc(100dvh - 8rem);
+    overflow-y: auto;
   }
   .nav.open {
     display: flex;
@@ -372,6 +375,7 @@ main.page {
   max-width: var(--maxw);
   margin: 0 auto;
   padding: 1.25rem var(--space) 3rem;
+  scroll-margin-top: 8rem;
 }
 .footer {
   border-top: 1px solid var(--border);
@@ -849,6 +853,7 @@ table.lesson-table th {
 }
 .need-input {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.4rem;
   align-items: center;
   padding: 0.5rem 0.7rem;
@@ -856,13 +861,18 @@ table.lesson-table th {
   border-top: 1px solid var(--border);
 }
 .need-input input {
-  flex: 1;
+  flex: 1 1 10rem;
+  min-width: 0;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius);
   padding: 0.35rem 0.6rem;
   font-family: var(--font-mono);
   direction: ltr;
   background: var(--surface);
+}
+.need-input label {
+  flex-basis: 100%;
+  overflow-wrap: anywhere;
 }
 .error-panel {
   border-top: 1px solid var(--border);
@@ -977,9 +987,12 @@ table.lesson-table th {
   gap: 1.5rem;
   align-items: start;
 }
+.lesson-layout > * {
+  min-width: 0;
+}
 @media (max-width: 960px) {
   .lesson-layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
   .lesson-side {
     order: -1;
@@ -988,6 +1001,11 @@ table.lesson-table th {
 .lesson-side {
   position: sticky;
   top: 4.2rem;
+}
+@media (max-width: 960px) {
+  .lesson-side {
+    position: static;
+  }
 }
 .lesson-section {
   scroll-margin-top: 4.5rem;
@@ -1328,6 +1346,7 @@ table.lesson-table th {
   bottom: 4.5rem;
   width: min(420px, calc(100vw - 2rem));
   max-height: min(70vh, 640px);
+  max-height: min(70dvh, 640px);
   z-index: 50;
   display: flex;
   flex-direction: column;
@@ -1347,6 +1366,8 @@ table.lesson-table th {
 }
 .tutor-messages {
   flex: 1;
+  min-height: 0;
+  min-width: 0;
   overflow: auto;
   padding: 0.8rem;
   display: grid;
@@ -1358,6 +1379,8 @@ table.lesson-table th {
   border-radius: var(--radius);
   max-width: 92%;
   font-size: 0.93rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .msg p:last-child {
   margin-bottom: 0;
@@ -1385,10 +1408,26 @@ table.lesson-table th {
 }
 .tutor-input input {
   flex: 1;
+  min-width: 0;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius);
   padding: 0.45rem 0.7rem;
   background: var(--surface);
+}
+.tutor-head,
+.tutor-quick,
+.tutor-input {
+  flex-shrink: 0;
+}
+
+/* Keep the editor readable and avoid iOS zooming when a small input is focused. */
+@media (pointer: coarse) {
+  input,
+  select,
+  textarea,
+  .workbench-editor .cm-editor {
+    font-size: max(1rem, 16px);
+  }
 }
 
 /* Form controls */

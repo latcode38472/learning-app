@@ -8,6 +8,7 @@ import { useApplyDocumentSettings } from './theme';
 import { Tutor } from './Tutor';
 import { useToast } from './ui';
 import { resetTutorContext } from '@/tutor/context';
+import { PageAnchor } from './PageAnchor';
 
 export function AppShell() {
   const { t, lang } = useI18n();
@@ -53,9 +54,9 @@ export function AppShell() {
 
   return (
     <div className="app-shell">
-      <a href="#main" className="skip-link">
+      <PageAnchor target="main" className="skip-link">
         {t('app.skipToContent')}
-      </a>
+      </PageAnchor>
       <header className="topbar">
         <div className="topbar-inner">
           <NavLink to="/" className="brand" aria-label={t('app.name')}>

@@ -60,7 +60,10 @@ export function Workbench({
   const toast = useToast();
   const recordRun = useStore((s) => s.recordRun);
   const status = useRuntimeStatus();
-  const [stdinText, setStdinText] = useState((sampleStdin ?? []).join('\n'));
+  // Keep lines as an array: [] and [''] both render as an empty text area,
+  // but Python must distinguish no answer from an intentionally empty answer.
+  const [stdinLines, setStdinLines] = useState<string[]>(sampleStdin ?? []);
+  const stdinText = stdinLines.join('\n');
   const [showStdin, setShowStdin] = useState((sampleStdin?.length ?? 0) > 0 || /\binput\s*\(/.test(code));
   const [result, setResult] = useState<RunResult | null>(null);
   const [running, setRunning] = useState(false);
@@ -98,13 +101,13 @@ export function Workbench({
     if (running) return;
     onRun?.();
     seed.current = Math.floor(Math.random() * 100000) + 1;
-    void execute(splitStdin(stdinText));
-  }, [execute, onRun, running, stdinText]);
+    void execute(stdinLines);
+  }, [execute, onRun, running, stdinLines]);
 
   const sendInput = () => {
     // Build the line list as an array so an empty first answer is still delivered.
-    const lines = [...splitStdin(stdinText), pendingInput];
-    setStdinText(lines.join('\n'));
+    const lines = [...stdinLines, pendingInput];
+    setStdinLines(lines);
     setPendingInput('');
     setShowStdin(true);
     void execute(lines);
@@ -162,7 +165,7 @@ export function Workbench({
 
       <CodeEditor value={code} onChange={onCodeChange} onRun={run} readOnly={readOnly} minHeight={minHeight} />
 
-      {showTrace && <Tracer code={code} stdin={splitStdin(stdinText)} autoRun />}
+      {showTrace && <Tracer code={code} stdin={stdinLines} autoRun />}
 
       {showStdin && (
         <div className="stdin-box">
@@ -171,7 +174,7 @@ export function Workbench({
             id={`${testIdPrefix}-stdin`}
             data-testid={`${testIdPrefix}-stdin`}
             value={stdinText}
-            onChange={(e) => setStdinText(e.target.value)}
+            onChange={(e) => setStdinLines(splitStdin(e.target.value))}
             placeholder={t('editor.stdinPlaceholder')}
             spellCheck={false}
           />
