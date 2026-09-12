@@ -1,8 +1,10 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useI18n } from '@/i18n';
 import { LANGUAGES } from '@/i18n/languages';
 import { buildProgressExport, useStore } from '@/state/store';
 import { downloadText } from '@/utils/download';
+import { fetchStatus, type AssistantStatus } from '@/assistant/client';
 import { Notice, Segmented, useDocumentTitle, useToast } from '@/components/ui';
 
 export function SettingsPage() {
@@ -15,7 +17,18 @@ export function SettingsPage() {
   const toast = useToast();
   const fileRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [aiStatus, setAiStatus] = useState<AssistantStatus | null | 'loading'>('loading');
   useDocumentTitle(t('settings.title'));
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetchStatus().then((s) => {
+      if (!cancelled) setAiStatus(s);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const onImport = async (file: File) => {
     try {
@@ -84,6 +97,18 @@ export function SettingsPage() {
           />
         </div>
         <div className="field">
+          <label>{t('settings.lessonView')}</label>
+          <Segmented
+            label={t('settings.lessonView')}
+            value={settings.lessonView}
+            onChange={(v) => updateSettings({ lessonView: v })}
+            options={[
+              { value: 'guided', label: t('settings.lessonViewGuided') },
+              { value: 'full', label: t('settings.lessonViewFull') },
+            ]}
+          />
+        </div>
+        <div className="field">
           <label>{t('settings.fontSize')}</label>
           <Segmented
             label={t('settings.fontSize')}
@@ -112,18 +137,14 @@ export function SettingsPage() {
       <section className="card stack-sm">
         <h2>{t('settings.tutor')}</h2>
         <p className="small">✓ {t('settings.tutorBuiltIn')}</p>
-        <h3>{t('settings.tutorRemote')}</h3>
-        <p className="small muted">{t('settings.tutorRemoteNote')}</p>
-        <div className="field">
-          <label htmlFor="tutor-endpoint">{t('settings.tutorEndpoint')}</label>
-          <input id="tutor-endpoint" type="url" placeholder="http://localhost:8787" value={settings.tutor.endpoint} onChange={(e) => updateSettings({ tutor: { ...settings.tutor, endpoint: e.target.value } })} dir="ltr" />
-        </div>
-        <label className="toggle">
-          <input type="checkbox" checked={settings.tutor.costAcknowledged} onChange={(e) => updateSettings({ tutor: { ...settings.tutor, costAcknowledged: e.target.checked } })} /> {t('settings.tutorCostAck')}
-        </label>
-        <label className="toggle">
-          <input type="checkbox" checked={settings.tutor.remoteEnabled} disabled={!settings.tutor.costAcknowledged || !settings.tutor.endpoint} onChange={(e) => updateSettings({ tutor: { ...settings.tutor, remoteEnabled: e.target.checked } })} /> {t('settings.tutorEnable')}
-        </label>
+        <p className="small">{t('settings.tutorAi')}</p>
+        <p className="small muted" data-testid="settings-ai-status">
+          {aiStatus === 'loading' ? t('app.loading') : aiStatus === null ? t('settings.tutorAiStatusUnknown') : aiStatus.canChat ? `${t('settings.tutorAiStatusOn')} (${aiStatus.model})` : t('settings.tutorAiStatusOff')}
+        </p>
+        <p className="small muted">{t('settings.tutorAiPrivacy')}</p>
+        <Link to="/owner" className="small">
+          {t('settings.ownerLink')}
+        </Link>
       </section>
 
       <section className="card stack-sm">

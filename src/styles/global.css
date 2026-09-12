@@ -981,8 +981,10 @@ table.lesson-table th {
   .lesson-layout {
     grid-template-columns: 1fr;
   }
+  /* On phones the current step comes first; the section list follows it. */
   .lesson-side {
-    order: -1;
+    order: 1;
+    position: static;
   }
 }
 .lesson-side {
@@ -1532,4 +1534,142 @@ details > summary {
   list-style: none;
   padding: 0;
   margin: 0;
+}
+
+/* Guided lesson view */
+.step-progress {
+  display: grid;
+  gap: 0.4rem;
+}
+.step-progress-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  align-items: baseline;
+}
+.step-dots {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+.step-dot {
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 999px;
+  border: 2px solid var(--border-strong);
+  background: var(--surface);
+  padding: 0;
+  cursor: pointer;
+}
+.step-dot.seen {
+  background: var(--border-strong);
+}
+.step-dot.current {
+  border-color: var(--primary);
+  background: var(--primary);
+  transform: scale(1.2);
+}
+.step-card {
+  min-height: 40vh;
+}
+.step-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.8rem;
+  margin-top: 1.4rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--border);
+}
+.step-nav-status {
+  flex: 1;
+  text-align: center;
+}
+.view-toggle {
+  display: flex;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+}
+.req-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.3rem 0 0;
+  display: grid;
+  gap: 0.3rem;
+}
+.req-list li {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+.req-list li.done {
+  color: var(--success);
+}
+.choice-card-lg .title {
+  font-size: 1.15rem;
+}
+h2:focus-visible,
+h2[tabindex='-1']:focus {
+  outline: none;
+}
+@media (max-width: 640px) {
+  .step-nav {
+    flex-wrap: wrap;
+  }
+  .step-nav-status {
+    order: 3;
+    width: 100%;
+  }
+}
+
+/* Help drawer tabs and AI bar */
+.tutor-tabs {
+  display: flex;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+}
+.tutor-ai-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.8rem;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.tutor-ai-bar .seg button {
+  padding: 0.25rem 0.6rem;
+  font-size: 0.85rem;
+}
+.msg[data-status='streaming'] p:last-child::after {
+  content: '▍';
+  opacity: 0.6;
+}
+
+/* Tracer: condition box and changed variables */
+.tracer:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+.tracer-cond {
+  border-radius: var(--radius);
+  padding: 0.4rem 0.6rem;
+  margin: 0.2rem 0 0.6rem;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+}
+.tracer-cond.is-true {
+  border-color: var(--success);
+  background: var(--success-soft);
+}
+.tracer-cond.is-false {
+  border-color: var(--warning);
+  background: var(--warning-soft);
+}
+.tracer-side tr.changed td {
+  background: var(--primary-soft);
+  font-weight: 600;
 }

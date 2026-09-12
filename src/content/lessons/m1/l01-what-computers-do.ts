@@ -243,8 +243,8 @@ export const lesson: Lesson = {
     mode: 'build',
     instructions: [
       p(
-        'Write a program that prints three lines about yourself: for example your name, something you like, and the place you live. Any text in English letters is fine, but there must be exactly three lines, and they must be different from each other.',
-        'כתבו תוכנית שמדפיסה שלוש שורות עליכם: למשל השם שלכם, משהו שאתם אוהבים, והמקום שבו אתם גרים. כל טקסט באותיות אנגליות מתאים, אבל חייבות להיות בדיוק שלוש שורות, שונות זו מזו.',
+        'Write a program that prints three lines about yourself: for example your name, something you like, and the place you live. Write them in any language you like; what matters is that there are exactly three lines and that they are different from each other.',
+        'כתבו תוכנית שמדפיסה שלוש שורות עליכם: למשל השם שלכם, משהו שאתם אוהבים, והמקום שבו אתם גרים. כתבו אותן בכל שפה שתרצו, גם בעברית; מה שחשוב הוא שיהיו בדיוק שלוש שורות, שונות זו מזו.',
       ),
       p(
         'The first line is written for you. Change it to say something about you, then add two more.',
@@ -259,8 +259,8 @@ export const lesson: Lesson = {
         pythonTest(
           py`
             lines = [l.strip() for l in stdout.strip().split("\n") if l.strip()]
-            assert len(lines) == 3, "Print exactly three lines (you printed " + str(len(lines)) + ")."
-            assert len(set(lines)) == 3, "Make the three lines different from each other."
+            assert len(lines) == 3, M("Print exactly three lines (you printed " + str(len(lines)) + ").", "הדפיסו בדיוק שלוש שורות (הדפסתם " + str(len(lines)) + ").")
+            assert len(set(lines)) == 3, M("Make the three lines different from each other.", "הפכו את שלוש השורות לשונות זו מזו.")
           `,
         ),
       ],
@@ -268,7 +268,7 @@ export const lesson: Lesson = {
     hints: [
       ['Each print shows one line, so you need three print lines, one under the other.', 'כל `print` מציג שורה אחת, ולכן אתם צריכים שלוש שורות `print`, אחת מתחת לשנייה.'],
       ['Keep the shape `print("...")` and change only the text between the quotation marks.', 'שמרו על הצורה `print("...")` ושנו רק את הטקסט שבין המירכאות.'],
-      ['For example: `print("My name is Noam.")`, then `print("I like football.")`, then `print("I live in Haifa.")`.', 'למשל: `print("My name is Noam.")`, אחר כך `print("I like football.")`, ואז `print("I live in Haifa.")`.'],
+      ['For example: `print("My name is Noam.")`, then `print("I like football.")`, then `print("I live in Haifa.")`.', 'למשל: `print("קוראים לי נועם.")`, אחר כך `print("אני אוהב כדורגל.")`, ואז `print("אני גר בחיפה.")`.'],
     ],
     solution: py`
       print("My name is Noam.")
@@ -353,7 +353,38 @@ export const lesson: Lesson = {
     ),
   ],
   next: t(
-    'Next you will see where a program lives (a file), what happens when you press Run, and the most important rule of all: lines run from top to bottom.',
-    'בשיעור הבא תראו איפה תוכנית נמצאת (בקובץ), מה קורה כשלוחצים על Run, והכלל החשוב מכולם: שורות מתבצעות מלמעלה למטה.',
+    'Next you will see where a program lives (a file), what happens when you press Run, and the first rule of reading a program: in programs like these, lines run from top to bottom.',
+    'בשיעור הבא תראו איפה תוכנית נמצאת (בקובץ), מה קורה כשלוחצים על Run, והכלל הראשון של קריאת תוכנית: בתוכניות כמו אלה, השורות מתבצעות מלמעלה למטה.',
   ),
+
+  miniChecks: [
+    choice(
+      'l01-m1',
+      ['A computer is best described as…', 'הכי מדויק לתאר מחשב בתור…'],
+      [
+        opt('a machine that follows instructions exactly.', 'מכונה שמבצעת הוראות בדיוק.', { correct: true, feedback: ['Right. Exactly, and very fast.', 'נכון. בדיוק, ומהר מאוד.'] }),
+        opt('a machine that understands what you want.', 'מכונה שמבינה מה אתם רוצים.', { feedback: ['It does not understand or guess. It only follows what it is told.', 'הוא לא מבין ולא מנחש. הוא רק מבצע מה שאומרים לו.'] }),
+      ],
+      ['computer-basics'],
+    ),
+    choice(
+      'l01-m2',
+      ['In `print("Hello")`, what do the quotation marks do?', 'ב-`print("Hello")`, מה עושות המירכאות?'],
+      [
+        opt('They mark where the text starts and ends.', 'הן מסמנות איפה הטקסט מתחיל ואיפה הוא נגמר.', { correct: true, feedback: ['Right. They are instructions for Python and are not shown.', 'נכון. הן הוראות לפייתון ולא מוצגות.'] }),
+        opt('They are printed on the screen with the word.', 'הן מודפסות על המסך יחד עם המילה.', { feedback: ['Only the text between them is shown. The marks themselves are not.', 'רק הטקסט שביניהן מוצג. המירכאות עצמן לא.'] }),
+      ],
+      ['print-basic'],
+    ),
+  ],
+
+  briskSummary: [
+    list([
+      ['A **computer** follows instructions exactly, very fast, without understanding or guessing.', '**מחשב** (computer) מבצע הוראות בדיוק, מהר מאוד, בלי להבין ובלי לנחש.'],
+      ['**Input** goes in, the computer **processes** it, **output** comes out (calculator: keys → adding → 5 on the screen).', '**קלט** (input) נכנס, המחשב **מעבד** (processing), **פלט** (output) יוצא (מחשבון: מקשים ← חיבור ← 5 על המסך).'],
+      ['A **program** is a list of instructions in a language the computer understands; **Python** is one such language.', '**תוכנית** (program) היא רשימת הוראות בשפה שהמחשב מבין; **פייתון** (Python) היא שפה כזאת.'],
+      ['`print("Hello")` shows `Hello`. `print` must be in small letters; the round brackets hold what to show; the quotation marks mark where the text starts and ends and are not shown.', '`print("Hello")` מציג `Hello`. את `print` כותבים באותיות קטנות; הסוגריים העגולים מחזיקים את מה שמציגים; המירכאות מסמנות את תחילת הטקסט וסופו ואינן מוצגות.'],
+      ['Every symbol must be typed exactly; a missing one stops the program with a message (lesson 4 reads those messages).', 'כל סימן חייב להיות כתוב בדיוק; סימן חסר עוצר את התוכנית עם הודעה (בשיעור 4 קוראים את ההודעות האלה).'],
+    ]),
+  ],
 };

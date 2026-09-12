@@ -86,8 +86,11 @@ export type TestCase =
        *   ns      – the learner's global namespace (dict) after running their code
        *   stdout  – everything the program printed while it ran
        *   run(lines) – re-run the program with the given input lines, returns stdout
+       *   run_all(lines) – re-run and return {"stdout", "ns", "error", "needInput"}
        *   source  – the learner's code as a string
-       * Use `assert cond, "message shown to the learner"`.
+       *   M(en, he) – a localized message; use it as the assert message so the
+       *               learner reads feedback in their own language
+       * Use `assert cond, M("message in English", "הודעה בעברית")`.
        */
       script: string;
       /** Input lines for the initial run of the program. */
@@ -257,6 +260,19 @@ export interface Lesson {
   /** 8. Recap and what this prepares the learner for. */
   recap: Block[];
   next: Text;
+
+  /**
+   * Optional: tiny one-question checks used by the guided view in "slow"
+   * pace, interleaved between explanation steps. They never gate progress;
+   * they exist so a slow-pace learner answers something every minute or two.
+   */
+  miniChecks?: Question[];
+  /**
+   * Optional: a compact summary shown in "brisk" pace instead of the full
+   * explanation, with the full explanation one click away. Must cover every
+   * essential of the lesson (never hide required knowledge).
+   */
+  briskSummary?: Block[];
 }
 
 /* ------------------------------------------------------------------ */
@@ -313,6 +329,17 @@ export interface ProjectStep {
   hints: Text[];
   /** Reference code for this step (shown after enough hints / on request). */
   referenceCode?: string;
+  /**
+   * For growing projects: lesson ids that must be learned before this step
+   * opens. Steps without `requires` inherit the project's prerequisites.
+   */
+  requires?: string[];
+  /** Optional heading that groups consecutive steps into a milestone (e.g. "Milestone 2: the player"). */
+  milestone?: Text;
+  /** Concept ids practised by this step. */
+  concepts?: string[];
+  /** Input lines pre-filled in the console for this step (overrides the project's sampleStdin). */
+  sampleStdin?: string[];
 }
 
 export interface Project {
@@ -330,6 +357,14 @@ export interface Project {
   /** Ideas for going further once every step passes. */
   extensions: Text[];
   concepts: string[];
+  /**
+   * A growing project opens early (after its first step's prerequisites) and
+   * unlocks further steps as lessons are completed. Other projects open only
+   * when every prerequisite lesson is learned.
+   */
+  growing?: boolean;
+  /** What the finished program does, in plain words (shown before starting). */
+  finishedDescription?: Text;
 }
 
 /* ------------------------------------------------------------------ */

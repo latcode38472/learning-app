@@ -53,6 +53,15 @@ export interface GradeResult {
   workerError?: string;
 }
 
+export interface TraceCondition {
+  /** Source text of the condition, e.g. "x > 3". */
+  src: string;
+  kind: 'if' | 'while';
+  result: boolean;
+  /** body = entered the block; else/elif = went to that branch; skip = jumped past the if; exit = left the loop. */
+  taken: 'body' | 'else' | 'elif' | 'skip' | 'exit';
+}
+
 export interface TraceStep {
   line: number;
   event: 'call' | 'line' | 'return';
@@ -61,6 +70,8 @@ export interface TraceStep {
   vars: Record<string, string>;
   stdout: string;
   ret: string | null;
+  /** Present when this line holds an if / elif / while test whose outcome is known. */
+  cond?: TraceCondition;
 }
 
 export interface TraceResult {

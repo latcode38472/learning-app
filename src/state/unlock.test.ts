@@ -12,6 +12,10 @@ import {
   isProjectUnlocked,
   missingProjectPrerequisites,
   dueConceptIds,
+  isProjectStepUnlocked,
+  missingStepPrerequisites,
+  availableStepCount,
+  stepRequirements,
 } from './unlock';
 import { scheduleAfterAnswer, initialConceptStats, isDue, isWeak } from './review';
 import { modules, lessons, lessonOrder, conceptMap, conceptToLesson, conceptsKnownAt, assessments, projects } from '@/content';
@@ -72,15 +76,49 @@ describe('unlock logic', () => {
   });
 
   it('project prerequisites are satisfied by tested-out modules', () => {
-    const adventure = projects['p-text-adventure'];
+    const guessing = projects['p-guessing-game'];
     const p = emptyProgress();
-    p.testedOut = ['m5', 'm6'];
-    for (const id of modules.find((m) => m.id === 'm7')!.lessonIds) p.lessons[id] = { status: 'completed', startedAt: 'x', completedAt: 'x' };
-    expect(isProjectUnlocked(adventure, p)).toBe(true);
-    expect(missingProjectPrerequisites(adventure, p)).toEqual([]);
+    p.testedOut = ['m1', 'm2', 'm3'];
+    for (const id of modules.find((m) => m.id === 'm4')!.lessonIds) p.lessons[id] = { status: 'completed', startedAt: 'x', completedAt: 'x' };
+    expect(isProjectUnlocked(guessing, p)).toBe(true);
+    expect(missingProjectPrerequisites(guessing, p)).toEqual([]);
     const q = emptyProgress();
-    expect(isProjectUnlocked(adventure, q)).toBe(false);
-    expect(missingProjectPrerequisites(adventure, q).length).toBeGreaterThan(0);
+    expect(isProjectUnlocked(guessing, q)).toBe(false);
+    expect(missingProjectPrerequisites(guessing, q).length).toBeGreaterThan(0);
+  });
+
+  it('the growing text adventure opens after lesson 5 and unlocks steps as their lessons are learned', () => {
+    const adventure = projects['p-text-adventure'];
+    expect(adventure.growing).toBe(true);
+    const fresh = emptyProgress();
+    expect(isProjectUnlocked(adventure, fresh)).toBe(false);
+    expect(missingProjectPrerequisites(adventure, fresh)).toEqual(['l05-print-and-strings']);
+
+    const p = withCompleted([...m1.lessonIds, 'l05-print-and-strings']);
+    expect(isProjectUnlocked(adventure, p)).toBe(true);
+    expect(isProjectStepUnlocked(adventure, adventure.steps[0], p)).toBe(true);
+    const variablesStep = adventure.steps.find((s) => s.id === 'ta-2-variables')!;
+    expect(isProjectStepUnlocked(adventure, variablesStep, p)).toBe(false);
+    expect(missingStepPrerequisites(adventure, variablesStep, p)).toEqual(['l06-variables']);
+    expect(availableStepCount(adventure, p)).toBe(1);
+
+    p.lessons['l06-variables'] = { status: 'completed', startedAt: 'x', completedAt: 'x' };
+    expect(isProjectStepUnlocked(adventure, variablesStep, p)).toBe(true);
+    expect(availableStepCount(adventure, p)).toBe(2);
+
+    // Every step requires a lesson that exists, and requirements never go backwards.
+    let last = -1;
+    for (const step of adventure.steps) {
+      const reqs = stepRequirements(adventure, step);
+      expect(reqs.length).toBeGreaterThan(0);
+      const idx = Math.max(...reqs.map((id) => lessonOrder.indexOf(id)));
+      expect(idx).toBeGreaterThanOrEqual(last);
+      last = idx;
+    }
+    // Testing out of the project's module opens everything.
+    const all = emptyProgress();
+    all.testedOut = ['m7'];
+    expect(availableStepCount(adventure, all)).toBe(adventure.steps.length);
   });
 
   it('only counts due concepts from learned lessons', () => {

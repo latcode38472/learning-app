@@ -385,4 +385,34 @@ export const lesson: Lesson = {
     'Next module: talking to the computer properly. You will learn print in full, what text and quotation marks really are, and how to leave notes in your code.',
     'המודול הבא: לדבר עם המחשב כמו שצריך. תלמדו את `print` לעומק, מה באמת הם טקסט ומירכאות, ואיך משאירים הערות בקוד.',
   ),
+
+  miniChecks: [
+    choice(
+      'l04-m1',
+      ['Python reports `SyntaxError` with `line 3`. Where do you look first?', 'פייתון מדווח `SyntaxError` עם `line 3`. איפה מסתכלים קודם?'],
+      [
+        opt('At line 3, character by character.', 'על שורה 3, תו אחר תו.', { correct: true, feedback: ['Right. The line number is the most useful part of the message.', 'נכון. מספר השורה הוא החלק הכי שימושי בהודעה.'] }),
+        opt('At line 1, because problems always start at the top.', 'על שורה 1, כי בעיות תמיד מתחילות למעלה.', { feedback: ['Trust the line number Python gives you.', 'סמכו על מספר השורה שפייתון נותן.'] }),
+      ],
+      ['error-message'],
+    ),
+    choice(
+      'l04-m2',
+      ['`pirnt("Hi")` gives which kind of error?', 'איזו שגיאה נותן `pirnt("Hi")`?'],
+      [
+        opt('`NameError`: Python does not know a word called pirnt.', '`NameError`: פייתון לא מכיר מילה בשם pirnt.', { correct: true, feedback: ['Right. The symbols are all there; the word is wrong.', 'נכון. כל הסימנים במקום; המילה שגויה.'] }),
+        opt('`SyntaxError`: a symbol is missing.', '`SyntaxError`: חסר סימן.', { feedback: ['Both brackets and both quotation marks are present, so the shape is fine. The word is unknown.', 'שני הסוגריים ושתי המירכאות קיימים, ולכן הצורה תקינה. המילה לא מוכרת.'] }),
+      ],
+      ['syntax-error'],
+    ),
+  ],
+
+  briskSummary: [
+    list([
+      ['A **bug** is a mistake in a program; an **error message** says the error type, the line number and a short description. It is information, not a punishment.', '**באג** (bug) הוא טעות בתוכנית; **הודעת שגיאה** (error message) אומרת את סוג השגיאה, את מספר השורה ותיאור קצר. זה מידע, לא עונש.'],
+      ['`SyntaxError`: a missing or misplaced symbol (quotation mark, bracket). Python checks the whole file first, so nothing runs.', '`SyntaxError`: סימן חסר או במקום הלא נכון (מירכאות, סוגר). פייתון בודק קודם את כל הקובץ, ולכן שום דבר לא רץ.'],
+      ['`NameError`: an unknown word, such as `pirnt` or text without quotation marks. It happens while running, so earlier lines already ran.', '`NameError`: מילה לא מוכרת, כמו `pirnt` או טקסט בלי מירכאות. זה קורה בזמן הריצה, ולכן שורות קודמות כבר רצו.'],
+      ['**Debugging** habit: read the message, go to that line, compare it with a line that works (`print("Hello")`). Fix one thing, run again. Python shows one problem at a time.', 'הרגל **ניפוי שגיאות** (debugging): קראו את ההודעה, לכו לשורה, השוו לשורה שעובדת (`print("Hello")`). תקנו דבר אחד, הריצו שוב. פייתון מציג בעיה אחת בכל פעם.'],
+    ]),
+  ],
 };

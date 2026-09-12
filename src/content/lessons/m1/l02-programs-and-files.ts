@@ -26,8 +26,8 @@ export const lesson: Lesson = {
   runsInBrowser: true,
 
   objective: t(
-    'Know what a program file is, what "running" means, where the output appears, and that lines run in order from top to bottom.',
-    'לדעת מהו קובץ של תוכנית, מה פירוש "להריץ", איפה הפלט מופיע, ושהשורות מתבצעות לפי הסדר מלמעלה למטה.',
+    'Know what a program file is, what "running" means, where the output appears, and that in these programs lines run in order from top to bottom.',
+    'לדעת מהו קובץ של תוכנית, מה פירוש "להריץ", איפה הפלט מופיע, ושבתוכניות האלה השורות מתבצעות לפי הסדר מלמעלה למטה.',
   ),
   prerequisiteCheck: t(
     'You have typed and run print("Hello") (lesson 1).',
@@ -55,10 +55,15 @@ export const lesson: Lesson = {
       ['The **Run** button hands the file to Python.', 'כפתור **Run** מוסר את הקובץ לפייתון.'],
       ['The **console** is the area where the output appears. Everything that print shows lands there.', 'ה**קונסולה** (console) היא האזור שבו הפלט מופיע. כל מה ש-`print` מציג מגיע לשם.'],
     ]),
-    h('The most important rule: top to bottom', 'הכלל החשוב ביותר: מלמעלה למטה'),
+    h('The first rule: top to bottom', 'הכלל הראשון: מלמעלה למטה'),
     p(
-      'Lines run one after another, in the order they are written: the first line first, the last line last. This order is called the **sequence**. Python never skips a line and never jumps ahead. If you want something to appear first, it has to be written first.',
-      'השורות מתבצעות בזו אחר זו, בסדר שבו הן כתובות: השורה הראשונה קודם, האחרונה בסוף. לסדר הזה קוראים **רצף** (sequence). פייתון אף פעם לא מדלג על שורה ולא קופץ קדימה. אם אתם רוצים שמשהו יופיע ראשון, הוא חייב להיות כתוב ראשון.',
+      'In the programs you are writing now, lines run one after another, in the order they are written: the first line first, the last line last. This order is called the **sequence**. If you want something to appear first, it has to be written first.',
+      'בתוכניות שאתם כותבים עכשיו, השורות מתבצעות בזו אחר זו, בסדר שבו הן כתובות: השורה הראשונה קודם, האחרונה בסוף. לסדר הזה קוראים **רצף** (sequence). אם אתם רוצים שמשהו יופיע ראשון, הוא חייב להיות כתוב ראשון.',
+    ),
+    callout(
+      'note',
+      'Later in the course you will meet instructions that let a program choose between lines or repeat some of them (module 3 and module 4). Even then, Python only ever moves the way the program tells it to. Nothing is skipped or repeated on its own.',
+      'בהמשך הקורס תפגשו הוראות שמאפשרות לתוכנית לבחור בין שורות או לחזור על חלק מהן (מודול 3 ומודול 4). גם אז, פייתון זז רק כפי שהתוכנית אומרת לו. שום דבר לא מדולג ולא חוזר מעצמו.',
     ),
     code(py`
       print("First")
@@ -67,8 +72,8 @@ export const lesson: Lesson = {
     `, { output: 'First\nSecond\nThird' }),
     callout(
       'tip',
-      'When a program prints things in the wrong order, do not look for a clever cause. Look at the order of the lines. The order of the output is always the order of the lines.',
-      'כשתוכנית מדפיסה דברים בסדר לא נכון, אל תחפשו סיבה מתוחכמת. הסתכלו על סדר השורות. סדר הפלט הוא תמיד סדר השורות.',
+      'When a program like this prints things in the wrong order, do not look for a clever cause. Look at the order of the lines: with only print lines, the order of the output is the order of the lines.',
+      'כשתוכנית כזאת מדפיסה דברים בסדר לא נכון, אל תחפשו סיבה מתוחכמת. הסתכלו על סדר השורות: כשיש רק שורות `print`, סדר הפלט הוא סדר השורות.',
     ),
   ],
 
@@ -78,8 +83,8 @@ export const lesson: Lesson = {
       'קובץ הוא כמו דף במחברת עם שם כתוב למעלה. התוכנית היא מה שכתוב על הדף הזה.',
     ),
     p(
-      'Running the program is like handing the page to a helper who reads it from the top line to the bottom line, doing each thing as they read it. They never start from the bottom, and they never skip a line.',
-      'להריץ את התוכנית זה כמו למסור את הדף לעוזר שקורא אותו מהשורה העליונה עד התחתונה, ומבצע כל דבר בזמן שהוא קורא. הוא אף פעם לא מתחיל מלמטה, ואף פעם לא מדלג על שורה.',
+      'Running the program is like handing the page to a helper who reads it from the top line to the bottom line, doing each thing as they read it. In these programs they never start from the bottom and never skip a line; later you will learn how to write "if…" and "repeat…" notes that tell the helper to choose or repeat.',
+      'להריץ את התוכנית זה כמו למסור את הדף לעוזר שקורא אותו מהשורה העליונה עד התחתונה, ומבצע כל דבר בזמן שהוא קורא. בתוכניות האלה הוא אף פעם לא מתחיל מלמטה ולא מדלג על שורה; בהמשך תלמדו לכתוב הערות "אם…" ו"חזור…" שאומרות לעוזר לבחור או לחזור.',
     ),
     p(
       'The editor is the page you write on. The Run button hands the page over. The console is where you see what the helper did.',
@@ -227,12 +232,12 @@ export const lesson: Lesson = {
     mode: 'build',
     instructions: [
       p(
-        'Write your morning routine as a program: one step per line, in the order you do them. Use between 4 and 6 lines. The first line must be exactly `Wake up` and the last line must be exactly `Leave the house`. The steps in between are yours to choose (in English letters), and each step should be different.',
-        'כתבו את שגרת הבוקר שלכם בתור תוכנית: צעד אחד בכל שורה, בסדר שבו אתם עושים אותם. השתמשו ב-4 עד 6 שורות. השורה הראשונה חייבת להיות בדיוק `Wake up` והשורה האחרונה בדיוק `Leave the house`. את הצעדים שביניהן אתם בוחרים (באותיות אנגליות), וכל צעד צריך להיות שונה מהאחרים.',
+        'Write your own morning routine as a program: one step per line, in the order you really do them, from waking up to leaving the house. Use between 4 and 6 lines, in any language you like, and make every step different. Because the routine is yours, the check only looks at the shape: the number of lines and that no line repeats.',
+        'כתבו את שגרת הבוקר שלכם בתור תוכנית: צעד אחד בכל שורה, בסדר שבו אתם באמת עושים אותם, מההשכמה ועד היציאה מהבית. השתמשו ב-4 עד 6 שורות, בכל שפה שתרצו, ודאגו שכל צעד יהיה שונה. מכיוון שהשגרה היא שלכם, הבדיקה מסתכלת רק על הצורה: מספר השורות, ושאף שורה לא חוזרת.',
       ),
       p(
-        'The first step is written for you.',
-        'הצעד הראשון כבר כתוב בשבילכם.',
+        'The first step is written for you. You can keep it, translate it, or change it.',
+        'הצעד הראשון כבר כתוב בשבילכם. אפשר להשאיר אותו, לתרגם אותו או לשנות אותו.',
       ),
     ],
     starterCode: py`
@@ -243,10 +248,8 @@ export const lesson: Lesson = {
         pythonTest(
           py`
             lines = [l.strip() for l in stdout.strip().split("\n") if l.strip()]
-            assert 4 <= len(lines) <= 6, "Print between 4 and 6 lines, one step per line (you printed " + str(len(lines)) + ")."
-            assert lines[0].lower() == "wake up", "The first line must be exactly: Wake up"
-            assert lines[-1].lower() == "leave the house", "The last line must be exactly: Leave the house"
-            assert len(set(l.lower() for l in lines)) == len(lines), "Each step should be different from the others."
+            assert 4 <= len(lines) <= 6, M("Print between 4 and 6 lines, one step per line (you printed " + str(len(lines)) + ").", "הדפיסו בין 4 ל-6 שורות, צעד אחד בכל שורה (הדפסתם " + str(len(lines)) + ").")
+            assert len(set(l.lower() for l in lines)) == len(lines), M("Each step should be different from the others.", "כל צעד צריך להיות שונה מהאחרים.")
           `,
         ),
       ],
@@ -254,7 +257,7 @@ export const lesson: Lesson = {
     hints: [
       ['Think of what you do between waking up and leaving: brushing teeth, getting dressed, eating breakfast.', 'חשבו מה אתם עושים בין ההשכמה ליציאה מהבית: לצחצח שיניים, להתלבש, לאכול ארוחת בוקר.'],
       ['Each step is one print line. Put them in the order you really do them.', 'כל צעד הוא שורת `print` אחת. סדרו אותם בסדר שבו אתם באמת עושים אותם.'],
-      ['End with `print("Leave the house")` so it is the last line printed.', 'סיימו ב-`print("Leave the house")` כדי שזו תהיה השורה האחרונה שמודפסת.'],
+      ['End with a line such as `print("Leave the house")` so it is the last line printed. Four lines are enough.', 'סיימו בשורה כמו `print("יוצאים מהבית")` כדי שזו תהיה השורה האחרונה שמודפסת. ארבע שורות מספיקות.'],
     ],
     solution: py`
       print("Wake up")
@@ -264,8 +267,8 @@ export const lesson: Lesson = {
       print("Leave the house")
     `,
     solutionNote: [
-      'Any steps in the middle are fine, as long as there are 4 to 6 lines and the first and last lines are the given ones.',
-      'כל צעדי ביניים מתאימים, כל עוד יש 4 עד 6 שורות והשורה הראשונה והאחרונה הן אלה שנדרשו.',
+      'Any steps in any language pass, as long as there are 4 to 6 lines and they are all different.',
+      'כל צעדים בכל שפה עוברים, כל עוד יש 4 עד 6 שורות וכולן שונות זו מזו.',
     ],
     concepts: ['sequence', 'print-basic', 'running-programs'],
   }),
@@ -317,7 +320,7 @@ export const lesson: Lesson = {
           feedback: ['Python does not sort anything. It runs line 1, then line 2.', 'פייתון לא ממיין שום דבר. הוא מבצע את שורה 1, ואז את שורה 2.'],
         }),
         opt('Both at the same time.', 'שניהם באותו זמן.', {
-          feedback: ['Lines run one after another, never together. Line 1 finishes before line 2 starts.', 'שורות מתבצעות בזו אחר זו, אף פעם לא יחד. שורה 1 מסתיימת לפני ששורה 2 מתחילה.'],
+          feedback: ['Lines run one after another, not together. Line 1 finishes before line 2 starts.', 'שורות מתבצעות בזו אחר זו, לא יחד. שורה 1 מסתיימת לפני ששורה 2 מתחילה.'],
         }),
       ],
       ['sequence'],
@@ -329,7 +332,7 @@ export const lesson: Lesson = {
       ['A program lives in a file. Python files end with `.py`.', 'תוכנית נמצאת בקובץ. קובצי פייתון מסתיימים ב-`.py`.'],
       ['Running a program means Python reads the file and performs each line.', 'להריץ תוכנית פירושו שפייתון קורא את הקובץ ומבצע כל שורה.'],
       ['You type in the editor, press Run, and read the output in the console.', 'מקלידים בעורך, לוחצים על Run, וקוראים את הפלט בקונסולה.'],
-      ['Lines run in sequence: top to bottom, one after another, never skipping.', 'השורות מתבצעות ברצף: מלמעלה למטה, בזו אחר זו, בלי לדלג.'],
+      ['In these programs, lines run in sequence: top to bottom, one after another. Choosing and repeating come in later modules.', 'בתוכניות האלה השורות מתבצעות ברצף: מלמעלה למטה, בזו אחר זו. בחירה וחזרה מגיעות במודולים הבאים.'],
     ]),
     p(
       'The top-to-bottom rule is so simple that it is easy to forget, and yet almost every question of the form "why did my program do that?" is answered by reading the lines in order.',
@@ -340,4 +343,37 @@ export const lesson: Lesson = {
     'Next you will practise thinking in steps: turning an everyday task into a precise list of instructions, which is what programming really is.',
     'בשיעור הבא תתאמנו בחשיבה בצעדים: להפוך משימה יומיומית לרשימה מדויקת של הוראות, וזה בעצם מה שתכנות באמת הוא.',
   ),
+
+  miniChecks: [
+    choice(
+      'l02-m1',
+      ['A file called `story.py` is…', 'קובץ בשם `story.py` הוא…'],
+      [
+        opt('a text file that holds a Python program.', 'קובץ טקסט שמכיל תוכנית פייתון.', { correct: true, feedback: ['Right. The .py ending says: Python program inside.', 'נכון. הסיומת .py אומרת: בפנים יש תוכנית פייתון.'] }),
+        opt('a program that is already running.', 'תוכנית שכבר רצה.', { feedback: ['A file just sits there until you run it.', 'קובץ פשוט יושב במקומו עד שמריצים אותו.'] }),
+      ],
+      ['file'],
+    ),
+    choice(
+      'l02-m2',
+      ['Where does the text from `print` appear?', 'איפה מופיע הטקסט של `print`?'],
+      [
+        opt('In the console, under the editor.', 'בקונסולה, מתחת לעורך.', { correct: true, feedback: ['Right. The editor holds the file; the console shows the output.', 'נכון. בעורך נמצא הקובץ; הקונסולה מציגה את הפלט.'] }),
+        opt('Inside the editor, next to the code.', 'בתוך העורך, ליד הקוד.', { feedback: ['The editor only shows what you typed. Output goes to the console.', 'העורך מציג רק מה שהקלדתם. הפלט הולך לקונסולה.'] }),
+      ],
+      ['console'],
+    ),
+  ],
+
+  briskSummary: [
+    list([
+      ['A program lives in a **file**; Python files end in `.py`. Here the file is created for you.', 'תוכנית נמצאת ב**קובץ** (file); קובצי פייתון מסתיימים ב-`.py`. כאן הקובץ נוצר בשבילכם.'],
+      ['**Running** a program means Python reads the file and performs each line. The **editor** holds the file, the Run button hands it to Python, and the **console** shows the output.', '**להריץ** (run) תוכנית פירושו שפייתון קורא את הקובץ ומבצע כל שורה. ה**עורך** (editor) מחזיק את הקובץ, כפתור Run מוסר אותו לפייתון, וה**קונסולה** (console) מציגה את הפלט.'],
+      ['In programs like these, lines run in **sequence**, top to bottom. The order of the print lines is the order of the output. Choosing and repeating lines come in later modules.', 'בתוכניות כמו אלה השורות מתבצעות ב**רצף** (sequence), מלמעלה למטה. סדר שורות ה-`print` הוא סדר הפלט. בחירה וחזרה על שורות מגיעות במודולים הבאים.'],
+    ]),
+    code(py`
+      print("First")
+      print("Second")
+    `, { output: 'First\nSecond' }),
+  ],
 };

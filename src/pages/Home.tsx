@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useI18n } from '@/i18n';
 import { useStore, currentStreak } from '@/state/store';
-import { dueConceptIds, isLessonCompleted, isLessonUnlocked, isProjectUnlocked, nextRecommendedLesson, stage1Summary } from '@/state/unlock';
+import { availableStepCount, dueConceptIds, isLessonCompleted, isLessonUnlocked, isProjectUnlocked, nextRecommendedLesson, stage1Summary } from '@/state/unlock';
 import { ACHIEVEMENTS } from '@/state/achievements';
 import { allProjects, lessons, moduleById, projects } from '@/content';
 import { Badge, ProgressBar, useDocumentTitle } from '@/components/ui';
@@ -115,6 +115,7 @@ export function HomePage() {
                   <div className="title">{l(p.title)}</div>
                   <div className="small muted">{l(p.tagline)}</div>
                 </div>
+                {p.growing && unlocked && !pp?.completedAt && <Badge tone="info">{t('projects.stepsOpen', { open: availableStepCount(p, progress), total: p.steps.length })}</Badge>}
                 {pp?.completedAt ? <Badge tone="success">{t('projects.completed')}</Badge> : unlocked ? null : <Badge>{t('projects.locked')}</Badge>}
                 {unlocked && (
                   <Link to={`/project/${p.id}`} className="btn btn-sm">

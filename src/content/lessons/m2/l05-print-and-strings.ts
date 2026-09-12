@@ -255,12 +255,12 @@ export const lesson: Lesson = {
     mode: 'build',
     instructions: [
       p(
-        'Build a poster for an event of your choice (a party, a game, a science fair). Print it in this shape: the event name on the first line, then an empty line, then a `Date:` line and a `Place:` line. For example:',
-        'בנו פוסטר לאירוע לבחירתכם (מסיבה, משחק, יריד מדע). הדפיסו אותו בצורה הזאת: שם האירוע בשורה הראשונה, אחר כך שורה ריקה, ואז שורת `Date:` ושורת `Place:`. למשל:',
+        'Build a poster for an event of your choice (a party, a game, a science fair), in English or in Hebrew. Print it in this shape: the event name on the first line, then an empty line, then a date line and a place line. The date line starts with the label `Date:` (or `תאריך:`) and the place line with `Place:` (or `מקום:`). For example:',
+        'בנו פוסטר לאירוע לבחירתכם (מסיבה, משחק, יריד מדע), בעברית או באנגלית. הדפיסו אותו בצורה הזאת: שם האירוע בשורה הראשונה, אחר כך שורה ריקה, ואז שורת תאריך ושורת מקום. שורת התאריך מתחילה בתווית `תאריך:` (או `Date:`) ושורת המקום ב-`מקום:` (או `Place:`). למשל:',
       ),
-      code('Science Fair\n\nDate: 14\nPlace: Room 3', { lang: 'text', runnable: false }),
+      code({ en: 'Science Fair\n\nDate: 14\nPlace: Room 3', he: 'יריד מדע\n\nתאריך: 14\nמקום: חדר 3' }, { lang: 'text', runnable: false }),
       list([
-        ['The date must be printed as two items: the label `"Date:"` and a number, separated by a comma — like `print("Date:", 14)`.', 'את התאריך יש להדפיס כשני פריטים: התווית `"Date:"` ומספר, מופרדים בפסיק — כמו `print("Date:", 14)`.'],
+        ['The date must be printed as two items: the label and a number, separated by a comma — like `print("Date:", 14)`.', 'את התאריך יש להדפיס כשני פריטים: התווית ומספר, מופרדים בפסיק — כמו `print("תאריך:", 14)`.'],
         ['Use `print()` for the empty line.', 'השתמשו ב-`print()` בשביל השורה הריקה.'],
         ['Add at least one comment line (starting with `#`) that says what the poster is for.', 'הוסיפו לפחות שורת הערה אחת (שמתחילה ב-`#`) שאומרת בשביל מה הפוסטר.'],
       ]),
@@ -279,9 +279,9 @@ export const lesson: Lesson = {
     check: {
       requires: [
         requires(
-          'print\\(\\s*["\']Date:["\']\\s*,',
-          'Print the label "Date:" and the number as two items separated by a comma, like print("Date:", 14).',
-          'הדפיסו את התווית `Date:` ואת המספר כשני פריטים מופרדים בפסיק, למשל `print("Date:", 14)`.',
+          'print\\(\\s*["\'](Date:|תאריך:)["\']\\s*,',
+          'Print the date label and the number as two items separated by a comma, like print("Date:", 14).',
+          'הדפיסו את תווית התאריך ואת המספר כשני פריטים מופרדים בפסיק, למשל `print("תאריך:", 14)`.',
         ),
       ],
       tests: [
@@ -290,24 +290,27 @@ export const lesson: Lesson = {
             lines = stdout.split("\n")
             while lines and lines[-1].strip() == "":
                 lines.pop()
-            assert len(lines) >= 4, "Print at least four lines: the event name, an empty line, a Date line and a Place line."
-            assert lines[0].strip() != "", "The first line must be the event name."
-            assert lines[1].strip() == "", "The second line must be empty: use print() with nothing inside."
-            date_ok = False
-            for l in lines:
-                if l.startswith("Date: ") and l[6:].split() and l[6:].split()[0].isdigit():
-                    date_ok = True
-            assert date_ok, "Print a line that starts with 'Date: ' followed by a number."
-            assert any(l.startswith("Place: ") and l[7:].strip() != "" for l in lines), "Print a line that starts with 'Place: ' followed by the place."
-            assert any(l.lstrip().startswith("#") for l in source.split("\n")), "Add at least one comment line that starts with #."
+            assert len(lines) >= 4, M("Print at least four lines: the event name, an empty line, a date line and a place line.", "הדפיסו לפחות ארבע שורות: שם האירוע, שורה ריקה, שורת תאריך ושורת מקום.")
+            assert lines[0].strip() != "", M("The first line must be the event name.", "השורה הראשונה חייבת להיות שם האירוע.")
+            assert lines[1].strip() == "", M("The second line must be empty: use print() with nothing inside.", "השורה השנייה חייבת להיות ריקה: השתמשו ב-print() בלי כלום בפנים.")
+            def after_label(line, labels):
+                for label in labels:
+                    if line.startswith(label + " "):
+                        return line[len(label) + 1:]
+                return None
+            date_ok = any((rest := after_label(l, ("Date:", "תאריך:"))) is not None and rest.split() and rest.split()[0].isdigit() for l in lines)
+            assert date_ok, M("Print a line that starts with 'Date: ' (or 'תאריך: ') followed by a number.", "הדפיסו שורה שמתחילה ב-'תאריך: ' (או 'Date: ') ואחריה מספר.")
+            place_ok = any((rest := after_label(l, ("Place:", "מקום:"))) is not None and rest.strip() != "" for l in lines)
+            assert place_ok, M("Print a line that starts with 'Place: ' (or 'מקום: ') followed by the place.", "הדפיסו שורה שמתחילה ב-'מקום: ' (או 'Place: ') ואחריה המקום.")
+            assert any(l.lstrip().startswith("#") for l in source.split("\n")), M("Add at least one comment line that starts with #.", "הוסיפו לפחות שורת הערה אחת שמתחילה ב-#.")
           `,
         ),
       ],
     },
     hints: [
       ['Start with the title: one print with the event name in quotes. Then `print()` on its own.', 'התחילו מהכותרת: `print` אחד עם שם האירוע במירכאות. אחר כך `print()` לבד.'],
-      ['The date line prints two items: `print("Date:", 14)` — the label in quotes, a comma, then the number without quotes.', 'שורת התאריך מדפיסה שני פריטים: `print("Date:", 14)` — התווית במירכאות, פסיק, ואז המספר בלי מירכאות.'],
-      ['The place line works the same way: `print("Place:", "Room 3")`. Do not forget a comment line starting with `#`.', 'שורת המקום עובדת באותו אופן: `print("Place:", "Room 3")`. אל תשכחו שורת הערה שמתחילה ב-`#`.'],
+      ['The date line prints two items: `print("Date:", 14)` — the label in quotes, a comma, then the number without quotes.', 'שורת התאריך מדפיסה שני פריטים: `print("תאריך:", 14)` — התווית במירכאות, פסיק, ואז המספר בלי מירכאות.'],
+      ['The place line works the same way: `print("Place:", "Room 3")`. Do not forget a comment line starting with `#`.', 'שורת המקום עובדת באותו אופן: `print("מקום:", "חדר 3")`. אל תשכחו שורת הערה שמתחילה ב-`#`.'],
     ],
     solution: py`
       # Poster for the school science fair
@@ -317,8 +320,8 @@ export const lesson: Lesson = {
       print("Place:", "Room 3")
     `,
     solutionNote: [
-      'Any event, date and place work, as long as the shape is the same.',
-      'כל אירוע, תאריך ומקום מתאימים, כל עוד הצורה נשארת זהה.',
+      'Any event, date and place work, in English or Hebrew, as long as the shape is the same.',
+      'כל אירוע, תאריך ומקום מתאימים, בעברית או באנגלית, כל עוד הצורה נשארת זהה.',
     ],
     concepts: ['print', 'string', 'print-multiple', 'comment'],
   }),
@@ -394,4 +397,35 @@ export const lesson: Lesson = {
     'Next you will give values a name with variables, so a program can remember things from one line to the next.',
     'בשיעור הבא תיתנו שמות לערכים בעזרת משתנים, כדי שתוכנית תוכל לזכור דברים משורה לשורה.',
   ),
+
+  miniChecks: [
+    choice(
+      'l05-m1',
+      ['What does `print("It\'s late")` show?', 'מה מציג `print("It\'s late")`?'],
+      [
+        opt('`It\'s late`', '`It\'s late`', { correct: true, feedback: ['Right. The double quotes wrap the text; the apostrophe inside is just a character.', 'נכון. המירכאות הכפולות עוטפות את הטקסט; הגרש שבפנים הוא סתם תו.'] }),
+        opt('An error, because there are three quote marks.', 'שגיאה, כי יש שלושה סימני מירכאות.', { feedback: ['The string opens and closes with double quotes; the apostrophe does not close it.', 'המחרוזת נפתחת ונסגרת במירכאות כפולות; הגרש לא סוגר אותה.'] }),
+      ],
+      ['quotes'],
+    ),
+    choice(
+      'l05-m2',
+      ['What does `print("Sum:", 7)` show?', 'מה מציג `print("Sum:", 7)`?'],
+      [
+        opt('`Sum: 7`', '`Sum: 7`', { correct: true, feedback: ['Right: two items, one space between them.', 'נכון: שני פריטים, רווח אחד ביניהם.'] }),
+        opt('`Sum:7`', '`Sum:7`', { feedback: ['A comma between items always adds one space.', 'פסיק בין פריטים תמיד מוסיף רווח אחד.'] }),
+      ],
+      ['print-multiple'],
+    ),
+  ],
+
+  briskSummary: [
+    list([
+      ['`print(...)` shows what is inside the parentheses in the console and then moves to a new line; `print()` prints an empty line.', '`print(...)` מציג בקונסולה את מה שבתוך הסוגריים ואז עובר לשורה חדשה; `print()` מדפיס שורה ריקה.'],
+      ['Text inside quotes is a **string**. `"..."` and `\'...\'` both work; close with the kind you opened with, so `"It\'s"` and `\'Say "hi"\'` are fine. The quotes are not printed.', 'טקסט בתוך מירכאות הוא **מחרוזת** (string). גם `"..."` וגם `\'...\'` עובדים; סוגרים באותו סוג שפתחתם, ולכן `"It\'s"` ו-`\'Say "hi"\'` תקינים. המירכאות לא מודפסות.'],
+      ['Without quotes Python sees a **name**, looks it up, and stops with `NameError`. The fix: add quotes.', 'בלי מירכאות פייתון רואה **שם**, מחפש אותו, ונעצר עם `NameError`. התיקון: הוסיפו מירכאות.'],
+      ['Commas inside print separate items with one space: `print("Good", "morning")` → `Good morning`. Numbers need no quotes.', 'פסיקים בתוך `print` מפרידים בין פריטים ברווח אחד: `print("Good", "morning")` ← `Good morning`. מספרים לא צריכים מירכאות.'],
+      ['`#` starts a **comment**: a note for people that Python skips; also handy for switching a line off.', '`#` מתחיל **הערה** (comment): פתק לאנשים שפייתון מדלג עליו; שימושי גם לכיבוי שורה.'],
+    ]),
+  ],
 };

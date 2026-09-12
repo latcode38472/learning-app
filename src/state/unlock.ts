@@ -12,7 +12,7 @@
  *  - A project opens when its prerequisite lessons are completed (or the
  *    module is tested out).
  */
-import type { Module, Project, Stage } from '@/content/schema';
+import type { Module, Project, ProjectStep, Stage } from '@/content/schema';
 import { conceptToLesson, lessons, moduleById, modules, stageById, lessonOrder } from '@/content';
 import type { Progress } from './store';
 import { isDue } from './review';
@@ -107,15 +107,44 @@ export function allLessonsDone(moduleId: string, progress: Progress): boolean {
   return !!mod && mod.lessonIds.length > 0 && mod.lessonIds.every((id) => isLessonCompleted(id, progress));
 }
 
+/** Lessons a project step needs: its own list, or the project's prerequisites. */
+export function stepRequirements(project: Project, step: ProjectStep): string[] {
+  return step.requires ?? project.prerequisites;
+}
+
+/**
+ * A growing project opens as soon as its first step's lessons are learned;
+ * other projects open when every prerequisite lesson is learned. Testing out
+ * of the project's module opens everything.
+ */
 export function isProjectUnlocked(project: Project, progress: Progress): boolean {
   if (isTestedOut(project.moduleId, progress)) return true;
+  if (project.growing && project.steps.length) return isProjectStepUnlocked(project, project.steps[0], progress);
   return project.prerequisites.every((id) => isLessonLearned(id, progress));
+}
+
+export function isProjectStepUnlocked(project: Project, step: ProjectStep, progress: Progress): boolean {
+  if (isTestedOut(project.moduleId, progress)) return true;
+  if (!project.growing) return isProjectUnlocked(project, progress);
+  return stepRequirements(project, step).every((id) => isLessonLearned(id, progress));
+}
+
+/** Lessons still needed before a step opens. */
+export function missingStepPrerequisites(project: Project, step: ProjectStep, progress: Progress): string[] {
+  if (isProjectStepUnlocked(project, step, progress)) return [];
+  return stepRequirements(project, step).filter((id) => !isLessonLearned(id, progress));
 }
 
 /** Prerequisite lessons of a project that are not learned yet. */
 export function missingProjectPrerequisites(project: Project, progress: Progress): string[] {
   if (isProjectUnlocked(project, progress)) return [];
+  if (project.growing && project.steps.length) return missingStepPrerequisites(project, project.steps[0], progress);
   return project.prerequisites.filter((id) => !isLessonLearned(id, progress));
+}
+
+/** How many steps of a project are open right now. */
+export function availableStepCount(project: Project, progress: Progress): number {
+  return project.steps.filter((s) => isProjectStepUnlocked(project, s, progress)).length;
 }
 
 export type StageState = 'available' | 'partial' | 'planned' | 'locked' | 'completed';

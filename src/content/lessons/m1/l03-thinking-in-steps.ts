@@ -159,8 +159,8 @@ export const lesson: Lesson = {
     mode: 'write',
     instructions: [
       p(
-        'Write the steps for washing your hands as 4 to 6 lines. Each line must start with its number and a dot, like `1. Turn on the tap`, and the numbers must go in order. Somewhere in the steps, in this order, the words `tap`, `soap`, `rinse` and `dry` must appear. The first step is already written.',
-        'כתבו את הצעדים לשטיפת ידיים ב-4 עד 6 שורות. כל שורה חייבת להתחיל במספר שלה ונקודה, למשל `1. Turn on the tap`, והמספרים חייבים להיות לפי הסדר. איפשהו בצעדים, ובסדר הזה, חייבות להופיע המילים `tap`, `soap`, `rinse` ו-`dry`. הצעד הראשון כבר כתוב.',
+        'Write the steps for washing your hands as 4 to 6 lines, in English or in Hebrew. Each line must start with its number and a dot, like `1. Turn on the tap`, and the numbers must go in order. Somewhere in the steps, in this order, these four things must be mentioned: the tap, soap, rinsing, drying (in English: `tap`, `soap`, `rinse`, `dry`; in Hebrew: ברז, סבון, שטיפה, ייבוש). The first step is already written.',
+        'כתבו את הצעדים לשטיפת ידיים ב-4 עד 6 שורות, באנגלית או בעברית. כל שורה חייבת להתחיל במספר שלה ונקודה, למשל `1. פותחים את הברז`, והמספרים חייבים להיות לפי הסדר. איפשהו בצעדים, ובסדר הזה, חייבים להופיע ארבעת הדברים האלה: הברז, סבון, שטיפה, ייבוש (בעברית: ברז, סבון, שטיפה/שוטפים, ייבוש/מייבשים; באנגלית: `tap`, `soap`, `rinse`, `dry`). הצעד הראשון כבר כתוב.',
       ),
     ],
     starterCode: py`
@@ -171,15 +171,16 @@ export const lesson: Lesson = {
         pythonTest(
           py`
             lines = [l.strip() for l in stdout.strip().split("\n") if l.strip()]
-            assert 4 <= len(lines) <= 6, "Print between 4 and 6 lines (you printed " + str(len(lines)) + ")."
+            assert 4 <= len(lines) <= 6, M("Print between 4 and 6 lines (you printed " + str(len(lines)) + ").", "הדפיסו בין 4 ל-6 שורות (הדפסתם " + str(len(lines)) + ").")
             for i, line in enumerate(lines):
-                assert line.startswith(str(i + 1) + "."), "Line " + str(i + 1) + " must start with " + str(i + 1) + ". (the number and a dot)."
+                assert line.startswith(str(i + 1) + "."), M("Line " + str(i + 1) + " must start with " + str(i + 1) + ". (the number and a dot).", "שורה " + str(i + 1) + " חייבת להתחיל ב-" + str(i + 1) + ". (המספר ונקודה).")
             text = stdout.lower()
             pos = 0
-            for word in ("tap", "soap", "rinse", "dry"):
-                found = text.find(word, pos)
-                assert found != -1, "The word '" + word + "' must appear after the earlier words. Order: tap, soap, rinse, dry."
-                pos = found + len(word)
+            steps = [("tap", ("tap", "ברז")), ("soap", ("soap", "סבון")), ("rinse", ("rinse", "שטפ", "שוטפ", "שטיפ")), ("dry", ("dry", "ייבש", "מייבש", "ייבוש", "מגבת"))]
+            for name, words in steps:
+                found = min((text.find(w, pos) for w in words if text.find(w, pos) != -1), default=-1)
+                assert found != -1, M("The step about '" + name + "' must come after the earlier steps. Order: tap, soap, rinse, dry.", "הצעד שעוסק ב-'" + name + "' חייב לבוא אחרי הצעדים הקודמים. הסדר: ברז, סבון, שטיפה, ייבוש.")
+                pos = found + 1
           `,
         ),
       ],
@@ -266,8 +267,8 @@ export const lesson: Lesson = {
     mode: 'build',
     instructions: [
       p(
-        'Write the steps for making toast as a program: 4 to 6 printed lines, one step per line, in the order a very literal robot would need them. Your steps must mention these words, in this order: `bread`, `toaster`, `wait`, `butter`. The other words are up to you (English letters). The first step is already written.',
-        'כתבו את הצעדים להכנת טוסט בתור תוכנית: 4 עד 6 שורות מודפסות, צעד אחד בכל שורה, בסדר שרובוט מילולי מאוד היה צריך אותם. הצעדים שלכם חייבים להזכיר את המילים האלה, בסדר הזה: `bread`, `toaster`, `wait`, `butter`. שאר המילים לבחירתכם (באותיות אנגליות). הצעד הראשון כבר כתוב.',
+        'Write the steps for making toast as a program: 4 to 6 printed lines, one step per line, in the order a very literal robot would need them. Your steps must mention these four things, in this order: the bread, the toaster, waiting, the butter (in English: `bread`, `toaster`, `wait`, `butter`; in Hebrew: לחם, טוסטר, לחכות, חמאה). The other words are up to you, in any language. The first step is already written.',
+        'כתבו את הצעדים להכנת טוסט בתור תוכנית: 4 עד 6 שורות מודפסות, צעד אחד בכל שורה, בסדר שרובוט מילולי מאוד היה צריך אותם. הצעדים שלכם חייבים להזכיר את ארבעת הדברים האלה, בסדר הזה: הלחם, הטוסטר, ההמתנה, החמאה (בעברית: לחם, טוסטר, לחכות/מחכים, חמאה; באנגלית: `bread`, `toaster`, `wait`, `butter`). שאר המילים לבחירתכם, בכל שפה. הצעד הראשון כבר כתוב.',
       ),
     ],
     starterCode: py`
@@ -278,20 +279,21 @@ export const lesson: Lesson = {
         pythonTest(
           py`
             lines = [l.strip() for l in stdout.strip().split("\n") if l.strip()]
-            assert 4 <= len(lines) <= 6, "Print between 4 and 6 lines, one step per line (you printed " + str(len(lines)) + ")."
+            assert 4 <= len(lines) <= 6, M("Print between 4 and 6 lines, one step per line (you printed " + str(len(lines)) + ").", "הדפיסו בין 4 ל-6 שורות, צעד אחד בכל שורה (הדפסתם " + str(len(lines)) + ").")
             text = stdout.lower()
             pos = 0
-            for word in ("bread", "toaster", "wait", "butter"):
-                found = text.find(word, pos)
-                assert found != -1, "The word '" + word + "' must appear after the earlier words. Order: bread, toaster, wait, butter."
-                pos = found + len(word)
+            steps = [("bread", ("bread", "לחם")), ("toaster", ("toaster", "טוסטר")), ("wait", ("wait", "חכ", "מחכ", "המתנ", "ממתינ")), ("butter", ("butter", "חמאה"))]
+            for name, words in steps:
+                found = min((text.find(w, pos) for w in words if text.find(w, pos) != -1), default=-1)
+                assert found != -1, M("The step about '" + name + "' must come after the earlier steps. Order: bread, toaster, wait, butter.", "הצעד שעוסק ב-'" + name + "' חייב לבוא אחרי הצעדים הקודמים. הסדר: לחם, טוסטר, לחכות, חמאה.")
+                pos = found + 1
           `,
         ),
       ],
     },
     hints: [
       ['Think like the robot: the bread has to go into the toaster before you can wait for it, and the butter comes last.', 'חשבו כמו הרובוט: הלחם חייב להיכנס לטוסטר לפני שאפשר לחכות לו, והחמאה באה בסוף.'],
-      ['One print per step, for example `print("Put the bread in the toaster")`.', 'שורת `print` אחת לכל צעד, למשל `print("Put the bread in the toaster")`.'],
+      ['One print per step, for example `print("Put the bread in the toaster")`.', 'שורת `print` אחת לכל צעד, למשל `print("שמים את הלחם בטוסטר")`.'],
       ['A possible order: take bread, put it in the toaster, wait until it pops up, spread butter on it.', 'סדר אפשרי: לקחת לחם, לשים אותו בטוסטר, לחכות עד שהוא קופץ, למרוח עליו חמאה.'],
     ],
     solution: py`
@@ -302,8 +304,8 @@ export const lesson: Lesson = {
       print("Eat it")
     `,
     solutionNote: [
-      'Any wording passes as long as the four key words appear in the right order and there are 4 to 6 lines.',
-      'כל ניסוח עובר, כל עוד ארבע מילות המפתח מופיעות בסדר הנכון ויש 4 עד 6 שורות.',
+      'Any wording, in English or Hebrew, passes as long as the four things appear in the right order and there are 4 to 6 lines.',
+      'כל ניסוח, באנגלית או בעברית, עובר, כל עוד ארבעת הדברים מופיעים בסדר הנכון ויש 4 עד 6 שורות.',
     ],
     concepts: ['algorithm', 'precision', 'step-by-step'],
   }),
@@ -378,4 +380,34 @@ export const lesson: Lesson = {
     'Next you will meet your first bug: what happens when a line is not precise enough for Python, and how to read the message it gives you.',
     'בשיעור הבא תפגשו את הבאג הראשון שלכם: מה קורה כששורה לא מדויקת מספיק בשביל פייתון, ואיך קוראים את ההודעה שהוא נותן לכם.',
   ),
+
+  miniChecks: [
+    choice(
+      'l03-m1',
+      ['Which of these is an algorithm?', 'מה מבין אלה הוא אלגוריתם?'],
+      [
+        opt('A recipe with numbered steps.', 'מתכון עם צעדים ממוספרים.', { correct: true, feedback: ['Right: precise steps, in order, that finish a job.', 'נכון: צעדים מדויקים, לפי הסדר, שמסיימים עבודה.'] }),
+        opt('A photo of a cake.', 'תמונה של עוגה.', { feedback: ['A photo shows the result. An algorithm is the list of steps that gets there.', 'תמונה מציגה את התוצאה. אלגוריתם הוא רשימת הצעדים שמובילה לשם.'] }),
+      ],
+      ['algorithm'],
+    ),
+    choice(
+      'l03-m2',
+      ['"Tidy your room" is not precise enough for a robot because…', '"סדר את החדר" לא מדויק מספיק בשביל רובוט כי…'],
+      [
+        opt('it does not say which small actions to do, or in what order.', 'הוא לא אומר אילו פעולות קטנות לעשות, ובאיזה סדר.', { correct: true, feedback: ['Right. A precise step can be done without thinking.', 'נכון. צעד מדויק אפשר לבצע בלי לחשוב.'] }),
+        opt('robots cannot tidy rooms.', 'רובוטים לא יכולים לסדר חדרים.', { feedback: ['They can, if every small action is spelled out.', 'הם יכולים, אם כל פעולה קטנה כתובה במפורש.'] }),
+      ],
+      ['precision'],
+    ),
+  ],
+
+  briskSummary: [
+    list([
+      ['An **algorithm** is a precise list of steps that completes a task: a recipe, directions, a program.', '**אלגוריתם** (algorithm) הוא רשימה מדויקת של צעדים שמשלימה משימה: מתכון, הוראות הגעה, תוכנית.'],
+      ['Computers need **precision**: every step spelled out, in the right order. They do what you say, not what you mean.', 'מחשבים צריכים **דיוק** (precision): כל צעד כתוב במפורש, בסדר הנכון. הם עושים מה שאמרתם, לא מה שהתכוונתם.'],
+      ['Method: say the finished result; list the steps in order; split any step you could not do without thinking; check that no step needs something that only comes later.', 'שיטה: אמרו מה התוצאה הסופית; רשמו את הצעדים לפי הסדר; פצלו כל צעד שאי אפשר לבצע בלי לחשוב; בדקו שאף צעד לא צריך משהו שמגיע רק אחר כך.'],
+      ['With only `print` so far, your programs describe steps; the thinking is the same as in real programs.', 'עם `print` בלבד עד כה, התוכניות שלכם מתארות צעדים; החשיבה זהה לזו שבתוכניות אמיתיות.'],
+    ]),
+  ],
 };

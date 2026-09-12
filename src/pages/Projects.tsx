@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { allProjects, lessons, moduleById } from '@/content';
 import { useI18n } from '@/i18n';
 import { useStore } from '@/state/store';
-import { isProjectUnlocked, missingProjectPrerequisites } from '@/state/unlock';
+import { availableStepCount, isProjectUnlocked, missingProjectPrerequisites } from '@/state/unlock';
 import { Badge, ProgressBar, useDocumentTitle } from '@/components/ui';
 
 export function ProjectsPage() {
@@ -31,8 +31,11 @@ export function ProjectsPage() {
               <div className="pill-row">
                 <Badge>{t('projects.steps', { count: p.steps.length })}</Badge>
                 <Badge>{t('curriculum.minutes', { count: p.estimatedMinutes })}</Badge>
+                {p.growing && <Badge tone="info">{t('projects.growing')}</Badge>}
+                {p.growing && unlocked && <Badge>{t('projects.stepsOpen', { open: availableStepCount(p, progress), total: p.steps.length })}</Badge>}
                 {pp?.completedAt && <Badge tone="success">{t('projects.completed')}</Badge>}
               </div>
+              {p.growing && <p className="small muted" style={{ margin: 0 }}>{t('projects.growingNote')}</p>}
               {pp && (
                 <div>
                   <ProgressBar value={done} max={p.steps.length} label={t('projects.progress', { done, total: p.steps.length })} />

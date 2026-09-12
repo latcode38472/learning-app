@@ -8,6 +8,19 @@ import { fileURLToPath, URL } from 'node:url';
 // VITE_BASE sets the public path. Leave it unset for local dev and for hosts
 // that serve the site at the domain root; set it to "/<repo>/" when publishing
 // to a GitHub Pages project site (the deploy workflow does this).
+
+/**
+ * The AI assistant backend runs as a Netlify Function in production
+ * (/api/assistant/*). Locally it is `node server/dev-server.mjs` on port 8787;
+ * dev and preview forward /api there so the app behaves the same way.
+ */
+const apiProxy = {
+  '/api': {
+    target: process.env.ASSISTANT_API_URL ?? 'http://127.0.0.1:8787',
+    changeOrigin: false,
+  },
+};
+
 export default defineConfig({
   base: process.env.VITE_BASE ?? '/',
   plugins: [react()],
@@ -39,8 +52,10 @@ export default defineConfig({
   server: {
     port: 5173,
     strictPort: false,
+    proxy: apiProxy,
   },
   preview: {
     port: 4173,
+    proxy: apiProxy,
   },
 });

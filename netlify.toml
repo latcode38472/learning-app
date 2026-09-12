@@ -34,3 +34,12 @@
   for = "/pyodide/*"
   [headers.values]
     Cache-Control = "public, max-age=604800"
+
+# The AI assistant backend. Modern (v2) function at netlify/functions/assistant.mjs,
+# routed by its own `config.path = "/api/assistant/*"`. It needs two environment
+# variables set in the Netlify UI (never in this file): OWNER_PASSWORD and
+# ASSISTANT_SECRET. The OpenRouter key is entered on /#/owner and stored encrypted
+# in Netlify Blobs. See docs/ASSISTANT-SETUP.md.
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"

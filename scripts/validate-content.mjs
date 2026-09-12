@@ -85,16 +85,21 @@ function normalize(text) {
   return lines.join('\n');
 }
 
+function messageText(m) {
+  if (m && typeof m === 'object') return m.en ?? JSON.stringify(m);
+  return m;
+}
+
 function describeFailure(result) {
   return result.results
     .filter((r) => !r.passed)
     .map((r) => {
-      if (r.kind !== 'test') return `${r.kind} check failed (${JSON.stringify(r.message?.en ?? r.message)})`;
+      if (r.kind !== 'test') return `${r.kind} check failed (${JSON.stringify(messageText(r.message))})`;
       if (r.error) return `test #${r.index} raised ${r.error.type}: ${r.error.message} (line ${r.error.line})`;
-      if (r.reason) return `test #${r.index} ${r.reason}${r.message ? ': ' + r.message : ''}`;
+      if (r.reason) return `test #${r.index} ${r.reason}${r.message ? ': ' + messageText(r.message) : ''}`;
       if (r.type === 'output') return `test #${r.index} output mismatch\n      expected: ${JSON.stringify(r.expected)}\n      actual:   ${JSON.stringify(r.actual)}`;
       if (r.type === 'function') return `test #${r.index} ${r.call} -> ${r.actualValue}, expected ${r.expected}`;
-      return `test #${r.index}: ${r.message ?? 'failed'}`;
+      return `test #${r.index}: ${messageText(r.message) ?? 'failed'}`;
     })
     .join('\n    ');
 }
@@ -268,6 +273,14 @@ for (const lessonId of conceptLessonOrder) {
     }
   }
   for (const q of lesson.check ?? []) checkQuestion(`${where} / ${q.id}`, q, knownConcepts);
+  for (const q of lesson.miniChecks ?? []) checkQuestion(`${where} / mini ${q.id}`, q, knownConcepts);
+  if (lesson.briskSummary !== undefined && lesson.briskSummary.length === 0) fail(where, 'briskSummary is present but empty');
+  for (const b of collectCodeBlocks(lesson.briskSummary ?? [])) {
+    if (b.lang === 'text' || b.output === undefined) continue;
+    const res = runProgram(localizedText(b.code));
+    if (res.error) fail(where, `briskSummary code block raises ${res.error.type}: ${res.error.message}`);
+    else if (normalize(res.stdout) !== normalize(localizedText(b.output))) fail(where, 'briskSummary code block documented output differs from real output');
+  }
 }
 
 // every module lesson id must exist (skipped when validating a subset)
@@ -339,6 +352,22 @@ for (const project of Object.values(projects)) {
   }
   for (const c of project.concepts ?? []) if (!(c in conceptToLesson)) fail(where, `unknown concept "${c}"`);
   for (const lid of project.prerequisites ?? []) if (!lessons[lid]) fail(where, `unknown prerequisite lesson "${lid}"`);
+  // Growing projects: step requirements must be real lessons, in curriculum order, and
+  // each step's reference code must only use concepts taught by its requirements.
+  if (project.growing) {
+    let lastIndex = -1;
+    for (const step of project.steps) {
+      const reqs = step.requires ?? project.prerequisites ?? [];
+      for (const lid of reqs) if (!lessons[lid]) fail(`${where} / ${step.id}`, `unknown required lesson "${lid}"`);
+      const idx = Math.max(-1, ...reqs.map((lid) => lessonOrder.indexOf(lid)));
+      if (idx < lastIndex) fail(`${where} / ${step.id}`, 'steps must unlock in curriculum order (a later step requires an earlier lesson than the step before it)');
+      lastIndex = Math.max(lastIndex, idx);
+      for (const c of step.concepts ?? []) {
+        if (!(c in conceptToLesson)) fail(`${where} / ${step.id}`, `unknown concept "${c}"`);
+        else if (idx >= 0 && lessonOrder.indexOf(conceptToLesson[c]) > idx) fail(`${where} / ${step.id}`, `practises "${c}" before its lesson is required`);
+      }
+    }
+  }
 }
 
 /* ---------------------------------------------------------- glossary */

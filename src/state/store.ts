@@ -3,6 +3,14 @@
  *
  * Everything is stored in the browser (localStorage) under a versioned key.
  * No account, no server, no personal data beyond an optional display name.
+ *
+ * Progress format history
+ *  v1  lessons completed automatically once the exercise and the building task
+ *      passed; the understanding check was optional.
+ *  v2  practice (exercise + build) and demonstrated understanding (the check)
+ *      are tracked separately and a lesson is complete only when both are
+ *      done. Lessons completed under v1 stay completed (`completedUnderV1`).
+ *      Adds `lessonPositions` so a learner returns to the step they were on.
  */
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
@@ -14,6 +22,8 @@ export type ThemeSetting = 'system' | 'light' | 'dark';
 export type StyleSetting = 'playful' | 'focused';
 export type PaceSetting = 'slow' | 'standard' | 'fast';
 export type FontSizeSetting = 'normal' | 'large' | 'xlarge';
+export type LessonViewSetting = 'guided' | 'full';
+export type ExperienceSetting = 'beginner' | 'experienced' | 'unknown';
 
 export interface Settings {
   language: LangCode;
@@ -25,11 +35,10 @@ export interface Settings {
   highContrast: boolean;
   name: string;
   onboarded: boolean;
-  tutor: {
-    remoteEnabled: boolean;
-    endpoint: string;
-    costAcknowledged: boolean;
-  };
+  /** Guided (one step at a time) or the whole lesson on one page. */
+  lessonView: LessonViewSetting;
+  /** What the learner told us at the start; only used to suggest a starting point. */
+  experience: ExperienceSetting;
 }
 
 export interface LessonProgress {
@@ -37,7 +46,27 @@ export interface LessonProgress {
   startedAt: string;
   completedAt?: string;
   predictDone?: boolean;
+  /** The learner finished at least one attempt of the understanding check. */
   checkDone?: boolean;
+  /** Demonstrated understanding: every question of the check answered correctly. */
+  checkPassed?: boolean;
+  checkAttempts?: number;
+  /** Best score in the understanding check (0..1). */
+  checkBest?: number;
+  understoodAt?: string;
+  /** Completed before v2, when the understanding check was not required. Kept complete. */
+  completedUnderV1?: boolean;
+}
+
+export interface LessonPosition {
+  /** Index of the guided step the learner was on. */
+  step: number;
+  /** Number of steps the lesson had at the time (steps depend on pace). */
+  total: number;
+  pace: PaceSetting;
+  /** Stable id of the step (e.g. "exercise", "explain-2") so a pace change resumes in the same section. */
+  stepId?: string;
+  updatedAt: string;
 }
 
 export interface ExerciseProgress {
@@ -70,9 +99,12 @@ export interface ProjectProgress {
   completedAt?: string;
 }
 
+export const PROGRESS_VERSION = 2;
+
 export interface Progress {
-  version: 1;
+  version: typeof PROGRESS_VERSION;
   lessons: Record<string, LessonProgress>;
+  lessonPositions: Record<string, LessonPosition>;
   exercises: Record<string, ExerciseProgress>;
   drafts: Record<string, string>;
   assessments: Record<string, AssessmentProgress>;
@@ -98,13 +130,23 @@ export const DEFAULT_SETTINGS: Settings = {
   highContrast: false,
   name: '',
   onboarded: false,
-  tutor: { remoteEnabled: false, endpoint: '', costAcknowledged: false },
+  lessonView: 'guided',
+  experience: 'unknown',
 };
+
+// These lists are used by sanitizeSettings() during store hydration, which
+// runs while this module is being evaluated, so they must be defined before
+// the store below (a later `const` would be in its temporal dead zone and the
+// hydration error would be swallowed, silently resetting every setting).
+const PACES: PaceSetting[] = ['slow', 'standard', 'fast'];
+const VIEWS: LessonViewSetting[] = ['guided', 'full'];
+const EXPERIENCES: ExperienceSetting[] = ['beginner', 'experienced', 'unknown'];
 
 export function emptyProgress(): Progress {
   return {
-    version: 1,
+    version: PROGRESS_VERSION,
     lessons: {},
+    lessonPositions: {},
     exercises: {},
     drafts: {},
     assessments: {},
@@ -120,12 +162,83 @@ export function emptyProgress(): Progress {
   };
 }
 
+/**
+ * Bring any stored progress object up to the current version. Never drops
+ * data: unknown fields are kept, missing ones get defaults, and a lesson that
+ * was completed under an older rule stays completed.
+ */
+export function migrateProgress(raw: unknown): Progress {
+  const base = emptyProgress();
+  if (!raw || typeof raw !== 'object') return base;
+  const src = raw as Partial<Progress> & { version?: number };
+  const version = typeof src.version === 'number' ? src.version : 1;
+  const lessons: Record<string, LessonProgress> = {};
+  for (const [id, lp] of Object.entries(src.lessons ?? {})) {
+    if (!lp || typeof lp !== 'object') continue;
+    const next: LessonProgress = { ...(lp as LessonProgress) };
+    if (version < 2 && next.status === 'completed' && !next.checkPassed) {
+      // v1 completed lessons without the understanding check: honour the completion.
+      next.completedUnderV1 = true;
+    }
+    lessons[id] = next;
+  }
+  return {
+    ...base,
+    ...src,
+    version: PROGRESS_VERSION,
+    lessons,
+    lessonPositions: src.lessonPositions && typeof src.lessonPositions === 'object' ? src.lessonPositions : {},
+    exercises: src.exercises ?? {},
+    drafts: src.drafts ?? {},
+    assessments: src.assessments ?? {},
+    projects: src.projects ?? {},
+    concepts: src.concepts ?? {},
+    testedOut: Array.isArray(src.testedOut) ? src.testedOut : [],
+    achievements: src.achievements ?? {},
+    activeDays: Array.isArray(src.activeDays) ? src.activeDays : [],
+    runCount: src.runCount ?? 0,
+    errorRuns: src.errorRuns ?? 0,
+    fixedErrors: src.fixedErrors ?? 0,
+    reviewSessions: src.reviewSessions ?? 0,
+  };
+}
+
 export function todayKey(date = new Date()): string {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, '0');
   const d = String(date.getDate()).padStart(2, '0');
   return `${y}-${m}-${d}`;
 }
+
+/* ---------------------------------------------------------------- completion rule */
+
+export interface LessonCompletionState {
+  exercisePassed: boolean;
+  buildPassed: boolean;
+  /** Both coding tasks passed. */
+  practiceDone: boolean;
+  /** The understanding check was passed (or the lesson was completed under v1). */
+  understood: boolean;
+  /** Everything required is done. */
+  complete: boolean;
+}
+
+/**
+ * The single definition of "lesson complete": the exercise passed, the
+ * building task passed, and the understanding check was passed. Lessons
+ * completed before this rule existed are honoured.
+ */
+export function lessonCompletionState(lessonId: string, exerciseId: string, buildId: string, progress: Progress): LessonCompletionState {
+  const lp = progress.lessons[lessonId];
+  const exercisePassed = progress.exercises[exerciseId]?.passed ?? false;
+  const buildPassed = progress.exercises[buildId]?.passed ?? false;
+  const practiceDone = exercisePassed && buildPassed;
+  const understood = !!lp?.checkPassed || !!lp?.completedUnderV1;
+  const complete = lp?.status === 'completed' || (practiceDone && understood);
+  return { exercisePassed, buildPassed, practiceDone, understood, complete };
+}
+
+/* ---------------------------------------------------------------- store */
 
 interface AppState {
   settings: Settings;
@@ -143,7 +256,9 @@ interface AppState {
   startLesson: (lessonId: string) => void;
   completeLesson: (lessonId: string) => void;
   markPredictDone: (lessonId: string) => void;
-  markCheckDone: (lessonId: string) => void;
+  /** Record one finished attempt of the understanding check. */
+  recordCheckAttempt: (lessonId: string, score: number, passed: boolean) => void;
+  saveLessonPosition: (lessonId: string, position: Omit<LessonPosition, 'updatedAt'>) => void;
 
   saveDraft: (id: string, code: string) => void;
   recordExerciseAttempt: (id: string, passed: boolean, hintsUsed: number) => void;
@@ -165,6 +280,10 @@ interface AppState {
 }
 
 const STORAGE_KEY = 'codepath.v1';
+
+function lessonEntry(s: AppState, lessonId: string): LessonProgress {
+  return s.progress.lessons[lessonId] ?? { status: 'started', startedAt: new Date().toISOString() };
+}
 
 export const useStore = create<AppState>()(
   persist(
@@ -216,24 +335,32 @@ export const useStore = create<AppState>()(
         }),
       markPredictDone: (lessonId) =>
         set((s) => ({
-          progress: {
-            ...s.progress,
-            lessons: {
-              ...s.progress.lessons,
-              [lessonId]: { ...(s.progress.lessons[lessonId] ?? { status: 'started', startedAt: new Date().toISOString() }), predictDone: true },
-            },
-          },
+          progress: { ...s.progress, lessons: { ...s.progress.lessons, [lessonId]: { ...lessonEntry(s, lessonId), predictDone: true } } },
         })),
-      markCheckDone: (lessonId) =>
-        set((s) => ({
-          progress: {
-            ...s.progress,
-            lessons: {
-              ...s.progress.lessons,
-              [lessonId]: { ...(s.progress.lessons[lessonId] ?? { status: 'started', startedAt: new Date().toISOString() }), checkDone: true },
+      recordCheckAttempt: (lessonId, score, passed) =>
+        set((s) => {
+          const prev = lessonEntry(s, lessonId);
+          const next: LessonProgress = {
+            ...prev,
+            checkDone: true,
+            checkAttempts: (prev.checkAttempts ?? 0) + 1,
+            checkBest: Math.max(prev.checkBest ?? 0, score),
+            checkPassed: prev.checkPassed || passed,
+            understoodAt: prev.understoodAt ?? (passed ? new Date().toISOString() : undefined),
+          };
+          return { progress: { ...s.progress, lessons: { ...s.progress.lessons, [lessonId]: next } } };
+        }),
+      saveLessonPosition: (lessonId, position) =>
+        set((s) => {
+          const prev = s.progress.lessonPositions[lessonId];
+          if (prev && prev.step === position.step && prev.total === position.total && prev.pace === position.pace && prev.stepId === position.stepId) return s;
+          return {
+            progress: {
+              ...s.progress,
+              lessonPositions: { ...s.progress.lessonPositions, [lessonId]: { ...position, updatedAt: new Date().toISOString() } },
             },
-          },
-        })),
+          };
+        }),
 
       saveDraft: (id, code) =>
         set((s) => {
@@ -333,7 +460,7 @@ export const useStore = create<AppState>()(
       importProgress: (data) => {
         if (!isProgressExport(data)) return false;
         set((s) => ({
-          progress: { ...emptyProgress(), ...data.progress, version: 1 },
+          progress: migrateProgress(data.progress),
           settings: data.settings ? sanitizeSettings({ ...s.settings, ...data.settings }) : s.settings,
         }));
         return true;
@@ -349,7 +476,7 @@ export const useStore = create<AppState>()(
         return {
           ...current,
           settings: sanitizeSettings({ ...current.settings, ...(p.settings ?? {}) }),
-          progress: { ...emptyProgress(), ...(p.progress ?? {}) },
+          progress: migrateProgress(p.progress),
         };
       },
     },
@@ -378,12 +505,17 @@ function safeStorage(): Storage {
   }
 }
 
-function sanitizeSettings(s: Settings): Settings {
+export function sanitizeSettings(s: Partial<Settings>): Settings {
+  const merged = { ...DEFAULT_SETTINGS, ...s } as Settings & Record<string, unknown>;
+  // Settings from older versions (e.g. the removed tutor-server fields) are dropped.
+  delete merged.tutor;
   return {
-    ...DEFAULT_SETTINGS,
-    ...s,
-    language: isLangCode(s.language) ? s.language : DEFAULT_LANGUAGE,
-    tutor: { ...DEFAULT_SETTINGS.tutor, ...(s.tutor ?? {}) },
+    ...merged,
+    language: isLangCode(merged.language) ? merged.language : DEFAULT_LANGUAGE,
+    pace: PACES.includes(merged.pace) ? merged.pace : DEFAULT_SETTINGS.pace,
+    lessonView: VIEWS.includes(merged.lessonView) ? merged.lessonView : DEFAULT_SETTINGS.lessonView,
+    experience: EXPERIENCES.includes(merged.experience) ? merged.experience : DEFAULT_SETTINGS.experience,
+    name: typeof merged.name === 'string' ? merged.name.slice(0, 40) : '',
   };
 }
 

@@ -96,8 +96,9 @@ to change), `build` (independent building task).
   instructions that the prompt wording is free ("Ask for a number (any prompt text)").
 * `functionTest('add(2, 3)', '5')` for functions (lesson 19 onward).
 * `pythonTest(script)` for structural checks: `ns` (learner globals),
-  `stdout`, `source`, `run(lines)`. Always give assert messages the learner can
-  act on, in **English** (they are shown as-is) — keep them short.
+  `stdout`, `source`, `run(lines)`, `run_all(lines)`. Always give assert
+  messages the learner can act on, localized with `M("English", "עברית")`
+  (see section 9) — keep them short.
 * Programs that use `random` are seeded per run, but never test exact random
   values; test structure or ranges instead.
 * `sampleStdin`: lines pre-filled in the console for the Run button when the
@@ -270,3 +271,56 @@ check questions `lNN-c1`, `lNN-c2`…
 - [ ] Feedback on every choice option; hints go from gentle to specific.
 - [ ] `estimatedMinutes` realistic (15–30 for beginners).
 - [ ] File compiles: `npm run typecheck`.
+
+## 9. Additions in the polished-beginner release
+
+### Localized check messages: `M()`
+
+`pythonTest` scripts can (and for new content must) localize their assert
+messages with the `M(en, he)` helper that the sandbox injects:
+
+```python
+assert len(lines) == 3, M("Print exactly three lines.", "הדפיסו בדיוק שלוש שורות.")
+```
+
+The learner sees the message in their language; plain string messages still
+work and are labelled "Shown in English" in Hebrew.
+
+`run_all(lines)` is also available: it re-runs the program with the given
+input lines and returns `{"stdout", "ns", "error", "needInput"}`, which lets a
+check look at variables *after* a specific input sequence (used by the growing
+project to check the inventory list).
+
+### Personal text in any language
+
+Building tasks and project steps should accept the learner's own words in any
+language. Check the **shape** (number of lines, distinct lines, a variable
+exists, a function returns a number) rather than English words. When a check
+must find a keyword, accept an English and a Hebrew form (see lesson 3's
+"toast" task), and say so in the instructions.
+
+### Guided view fields
+
+* `miniChecks?: Question[]` — one-question checks used only in *slow* pace,
+  interleaved after explanation chunks. Two per lesson is plenty. They never
+  gate progress.
+* `briskSummary?: Block[]` — a compact version of the explanation used in
+  *brisk* pace (the full explanation stays one click away). It must still
+  cover every essential the exercise relies on.
+
+The guided view splits the explanation at `h()` headings in slow pace, so put
+a heading before each new idea.
+
+### Growing projects
+
+A project with `growing: true` opens after its first step's `requires` lessons
+and unlocks steps one by one. Each step lists `requires` (lesson ids),
+`concepts`, and an optional `milestone` heading. Rules the validator enforces:
+
+* steps unlock in curriculum order;
+* a step practises only concepts taught by its required lessons;
+* the final reference code passes every step's check (checks are cumulative),
+  so every check must supply enough `stdin` for the finished game as well.
+
+The tutor/assistant context for a project uses the active step's last
+required lesson as the "current lesson".

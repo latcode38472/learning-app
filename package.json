@@ -14,13 +14,16 @@
     "test:content": "node scripts/validate-content.mjs",
     "test:e2e": "playwright test",
     "tutor-server": "node server/tutor-server.mjs",
-    "check": "npm run typecheck && npm run test && npm run test:content"
+    "check": "npm run typecheck && npm run test && npm run test:content",
+    "api": "node server/dev-server.mjs",
+    "api:mock": "node server/assistant/mock-openrouter.mjs"
   },
   "dependencies": {
     "@codemirror/commands": "^6.8.1",
     "@codemirror/lang-python": "^6.2.1",
     "@codemirror/state": "^6.5.2",
     "@codemirror/view": "^6.38.0",
+    "@netlify/blobs": "^11.0.3",
     "@uiw/react-codemirror": "^4.25.11",
     "codemirror": "^6.0.2",
     "pyodide": "314.0.6",

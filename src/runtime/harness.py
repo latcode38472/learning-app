@@ -13,6 +13,7 @@ Public functions (all return JSON-friendly dicts):
   trace_program(code, stdin_lines, seed, max_steps)        -> {steps: [...], error, stdout}
 """
 
+import ast
 import builtins
 import io
 import json
@@ -25,6 +26,25 @@ import traceback
 
 USER_FILE = "main.py"
 MAX_OUTPUT = 60_000
+
+# Assert messages in check scripts can be localized: M("English", "עברית")
+# returns a marker string that the grader turns back into {"en": ..., "he": ...}.
+I18N_MARKER = "@@i18n@@"
+
+
+def _localized_message(en, he=None):
+    return I18N_MARKER + json.dumps({"en": str(en), "he": str(he if he is not None else en)}, ensure_ascii=False)
+
+
+def _decode_message(text):
+    """A plain string, or a dict when the message came from M()."""
+    text = _safe_str(text)
+    if text.startswith(I18N_MARKER):
+        try:
+            return json.loads(text[len(I18N_MARKER):])
+        except ValueError:
+            return text[len(I18N_MARKER):]
+    return text
 
 # Modules that would let learner code reach the JavaScript host (worker scope,
 # fetch, postMessage). They are hidden while learner code runs.
@@ -396,18 +416,25 @@ def grade(code, check, seed=0):
                 inner, _ = _execute(code, list(lines), seed, echo=False, show_prompt=False)
                 return inner["stdout"]
 
+            def _run_all(lines=()):
+                """Re-run with input lines; returns {"stdout", "ns", "error"} for structural checks."""
+                inner, inner_ns = _execute(code, list(lines), seed, echo=False, show_prompt=False)
+                return {"stdout": inner["stdout"], "ns": inner_ns, "error": inner["error"], "needInput": inner["needInput"]}
+
             env = {
                 "__builtins__": builtins,
                 "ns": ns,
                 "stdout": res["stdout"],
                 "source": code,
                 "run": _run,
+                "run_all": _run_all,
+                "M": _localized_message,
             }
             _v, _printed, err = _capture(lambda: exec(tc.get("script", ""), env))
             if err is None:
                 r["passed"] = True
             elif isinstance(err, AssertionError):
-                r["message"] = _safe_str(err) or "A check did not pass."
+                r["message"] = _decode_message(err) if _safe_str(err) else "A check did not pass."
             elif isinstance(err, NeedInput):
                 r["reason"] = "need-input"
             elif isinstance(err, OutputLimitExceeded):
@@ -433,6 +460,79 @@ def _is_hidden(name, value):
     if tname in ("module", "function", "builtin_function_or_method", "type", "method"):
         return True
     return False
+
+
+def _condition_map(code):
+    """Lines that hold an if / elif / while test, with where each branch starts.
+
+    Used after tracing to work out what the condition evaluated to: the line
+    that runs next tells us whether the body, the else part, or the code after
+    the statement was chosen.
+    """
+    try:
+        tree = ast.parse(code)
+    except SyntaxError:
+        return {}
+    out = {}
+
+    def record(node, kind):
+        try:
+            src = ast.get_source_segment(code, node.test) or ""
+        except Exception:  # noqa: BLE001
+            src = ""
+        entry = {
+            "kind": kind,
+            "src": src,
+            "body": node.body[0].lineno if node.body else None,
+            "orelse": node.orelse[0].lineno if node.orelse else None,
+            "elif": bool(node.orelse) and len(node.orelse) == 1 and isinstance(node.orelse[0], ast.If) and kind != "while",
+            "start": node.lineno,
+            "end": getattr(node, "end_lineno", node.lineno),
+        }
+        out.setdefault(node.lineno, entry)
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.If):
+            record(node, "if")
+        elif isinstance(node, ast.While):
+            record(node, "while")
+    return out
+
+
+def _annotate_conditions(steps, cond_map):
+    """Attach {src, result, taken} to steps that sit on a condition line."""
+    for i, step in enumerate(steps):
+        if step["event"] != "line":
+            continue
+        entry = cond_map.get(step["line"])
+        if not entry:
+            continue
+        nxt = None
+        for later in steps[i + 1:]:
+            if later["depth"] == step["depth"] and later["func"] == step["func"]:
+                nxt = later
+                break
+            if later["depth"] < step["depth"]:
+                break
+        info = {"src": entry["src"], "kind": entry["kind"], "result": None, "taken": None}
+        if nxt is None:
+            # Nothing else ran in this frame: the condition ended the block.
+            if entry["kind"] == "while":
+                info["result"] = False
+                info["taken"] = "exit"
+        elif nxt["event"] == "return":
+            pass
+        elif nxt["line"] == entry["body"]:
+            info["result"] = True
+            info["taken"] = "body"
+        elif entry["orelse"] is not None and nxt["line"] == entry["orelse"]:
+            info["result"] = False
+            info["taken"] = "elif" if entry["elif"] else "else"
+        elif nxt["line"] < entry["start"] or nxt["line"] > entry["end"] or nxt["line"] == step["line"]:
+            info["result"] = False
+            info["taken"] = "exit" if entry["kind"] == "while" else "skip"
+        if info["result"] is not None:
+            step["cond"] = info
 
 
 def trace_program(code, stdin_lines=(), seed=0, max_steps=400):
@@ -485,6 +585,7 @@ def trace_program(code, stdin_lines=(), seed=0, max_steps=400):
         sys.settrace(None)
 
     result, ns = _execute(code, stdin_lines, seed, echo=True, show_prompt=True, before_exec=before, after_exec=after)
+    _annotate_conditions(steps, _condition_map(code))
     final_vars = {k: _safe_repr(v) for k, v in ns.items() if not _is_hidden(k, v)}
     return {
         "steps": steps,

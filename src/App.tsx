@@ -17,6 +17,7 @@ import { AchievementsPage } from './pages/Achievements';
 import { SettingsPage } from './pages/Settings';
 import { LocalPage } from './pages/Local';
 import { LabsPage } from './pages/Labs';
+import { OwnerPage } from './pages/Owner';
 import { NotFoundPage } from './pages/NotFound';
 
 function RequireOnboarding({ children }: { children: React.ReactElement }) {
@@ -55,6 +56,7 @@ export function App() {
             <Route path="/local" element={<RequireOnboarding><LocalPage /></RequireOnboarding>} />
             <Route path="/labs" element={<RequireOnboarding><LabsPage /></RequireOnboarding>} />
             <Route path="/labs/:labId" element={<RequireOnboarding><LabsPage /></RequireOnboarding>} />
+            <Route path="/owner" element={<OwnerPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Routes>
