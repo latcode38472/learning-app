@@ -233,9 +233,16 @@ function LessonView({ lesson }: { lesson: Lesson }) {
                 aria-current={current ? 'step' : undefined}
                 style={current ? { background: 'var(--primary-soft)' } : undefined}
                 onClick={(e) => {
-                  if (view !== 'guided') return;
+                  // In-page navigation must not replace the fragment owned by HashRouter.
                   e.preventDefault();
-                  goTo(firstStepOfSection(steps, section));
+                  if (view === 'guided') {
+                    goTo(firstStepOfSection(steps, section));
+                    return;
+                  }
+                  const element = document.getElementById(section);
+                  if (!element) return;
+                  element.focus({ preventScroll: true });
+                  element.scrollIntoView({ block: 'start' });
                 }}
               >
                 <span className={`dot${done && i >= 3 ? ' done' : ''}`} aria-hidden="true" />
@@ -615,7 +622,7 @@ function FullSection({ n, id, label, done, children }: { n: number; id: string; 
   const { t } = useI18n();
   const showDone = done && n > 3;
   return (
-    <section className="card lesson-section" id={id} aria-labelledby={`h-${id}`}>
+    <section className="card lesson-section" tabIndex={-1} id={id} aria-labelledby={`h-${id}`}>
       <div className={`section-head${showDone ? ' section-done' : ''}`}>
         <span className="section-num" aria-hidden="true">
           {showDone ? '✓' : n}

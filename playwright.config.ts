@@ -60,5 +60,10 @@ export default defineConfig({
           timeout: 240_000,
         },
       ],
-  projects: [{ name: 'chromium' }],
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'], launchOptions: executablePath ? { executablePath } : {} } },
+    { name: 'webkit', use: { ...devices['Desktop Safari'] } },
+    { name: 'iphone', use: { ...devices['iPhone 13'] } },
+    { name: 'android', use: { ...devices['Pixel 5'], launchOptions: executablePath ? { executablePath } : {} } },
+  ],
 });

@@ -7,6 +7,7 @@
  * skip themselves after checking /api/assistant/status.
  */
 import { expect, test, type Page } from '@playwright/test';
+import { setEditor } from './editor';
 
 const OWNER_PASSWORD = process.env.E2E_OWNER_PASSWORD ?? 'e2e-owner-password';
 const MOCK_KEY = 'sk-or-v1-mock-valid-key-0000000000';
@@ -17,24 +18,6 @@ async function onboard(page: Page, lang: 'en' | 'he' = 'en') {
   await page.getByTestId('onboarding-next').click();
   await page.getByTestId('onboarding-start').click();
   await expect(page.getByTestId('home')).toBeVisible();
-}
-
-async function setEditor(page: Page, prefix: string, code: string) {
-  const editor = page.getByTestId(prefix).locator('.cm-content').first();
-  await editor.click();
-  await page.keyboard.press('Control+A');
-  await page.keyboard.press('Delete');
-  // Type line by line so CodeMirror's auto-indent does not add extra spaces.
-  const lines = code.split('\n');
-  for (let i = 0; i < lines.length; i += 1) {
-    if (i > 0) {
-      await page.keyboard.press('Enter');
-      await page.keyboard.press('Home');
-      await page.keyboard.press('Shift+End');
-      await page.keyboard.press('Delete');
-    }
-    await page.keyboard.type(lines[i]);
-  }
 }
 
 /** Jump to a lesson section in the guided view via the side table of contents. */
@@ -429,6 +412,10 @@ test.describe('AI assistant (owner-configured, mocked OpenRouter)', () => {
     await page.getByTestId('owner-login-submit').click();
     await expect(page.getByTestId('owner-panel')).toBeVisible();
 
+    // The backend keeps its config across browser projects in one run, so start from a known model.
+    await page.getByTestId('owner-model-input').fill('openai/gpt-4o-mini');
+    await page.getByTestId('owner-settings-save').click();
+    await expect(page.getByTestId('owner-panel')).toContainText('Settings saved');
     await page.getByTestId('owner-key-input').fill(MOCK_KEY);
     await page.getByTestId('owner-key-save').click();
     await expect(page.getByTestId('owner-key-status')).toContainText('sk-or-v1-…0000');
