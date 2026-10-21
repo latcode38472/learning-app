@@ -119,6 +119,25 @@ describe('owner authorisation is enforced on the server', () => {
   });
 });
 
+describe('model configuration', () => {
+  it('uses the replacement for new and model-less stored configurations', async () => {
+    expect((await (await handler(req('/status'))).json()).model).toBe('google/gemini-3.1-flash-lite');
+    await storage.setJSON('config', { learnerAccess: false });
+    expect((await (await handler(req('/status'))).json()).model).toBe('google/gemini-3.1-flash-lite');
+  });
+
+  it('preserves saved owner choices, including legacy models, until explicitly changed', async () => {
+    for (const model of ['openai/gpt-4o-mini', 'mock/slow']) {
+      await storage.setJSON('config', { model });
+      expect((await (await handler(req('/status'))).json()).model).toBe(model);
+    }
+    const cookie = await login();
+    const res = await handler(req('/owner/settings', { method: 'PUT', cookie, body: JSON.stringify({ model: 'google/gemini-3.1-flash-lite' }) }));
+    expect(res.status).toBe(200);
+    expect(storage.dump().config.model).toBe('google/gemini-3.1-flash-lite');
+  });
+});
+
 describe('API key handling', () => {
   it('stores the key encrypted, returns only a masked status, never the key', async () => {
     const cookie = await login();
@@ -157,6 +176,7 @@ describe('API key handling', () => {
     expect(res.key.label).toBe('mock key');
     expect(res.key.limitRemaining).toBe(4.25);
     expect(res.model.found).toBe(true);
+    expect(res.model.id).toBe('google/gemini-3.1-flash-lite');
     expect(res.sample.text).toBe('OK');
     expect(res.sample.usage.completionTokens).toBeGreaterThan(0);
     await handler(req('/owner/settings', { method: 'PUT', cookie, body: JSON.stringify({ model: 'mock/unknown-model' }) }));
@@ -204,7 +224,7 @@ describe('chat access and streaming', () => {
     expect(res.status).toBe(200);
     const events = await readSse(res);
     expect(events[0].event).toBe('meta');
-    expect(events[0].data.model).toBe('openai/gpt-4o-mini');
+    expect(events[0].data.model).toBe('google/gemini-3.1-flash-lite');
     const text = events.filter((e) => e.event === 'delta').map((e) => e.data.text).join('');
     expect(text).toContain('look at your code');
     expect(events.find((e) => e.event === 'usage')?.data.completionTokens).toBeGreaterThan(0);
@@ -213,7 +233,7 @@ describe('chat access and streaming', () => {
     expect(day.requests).toBe(1);
     expect(day.byClient['dev-1'].requests).toBe(1);
     expect(day.cost).toBeGreaterThan(0);
-    expect(day.byModel['openai/gpt-4o-mini'].completionTokens).toBeGreaterThan(0);
+    expect(day.byModel['google/gemini-3.1-flash-lite'].completionTokens).toBeGreaterThan(0);
   });
 
   it('answers in Hebrew when asked', async () => {

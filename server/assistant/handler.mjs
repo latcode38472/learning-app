@@ -49,7 +49,7 @@ export function defaultConfig() {
     keyMasked: null,
     keySavedAt: null,
     keyLabel: null,
-    model: 'openai/gpt-4o-mini',
+    model: 'google/gemini-3.1-flash-lite',
     learnerAccess: false,
     limits: { ...DEFAULT_LIMITS },
     updatedAt: null,
@@ -340,7 +340,7 @@ export function createAssistantHandler({ env = process.env, storage, fetchImpl =
     const config = await loadConfig();
     if (typeof body.model === 'string') {
       const model = body.model.trim();
-      if (!/^[a-zA-Z0-9._:/-]{3,120}$/.test(model)) return error(400, 'invalid_model', 'A model id looks like "openai/gpt-4o-mini".');
+      if (!/^[a-zA-Z0-9._:/-]{3,120}$/.test(model)) return error(400, 'invalid_model', 'A model id looks like "google/gemini-3.1-flash-lite".');
       config.model = model;
     }
     if (typeof body.learnerAccess === 'boolean') {

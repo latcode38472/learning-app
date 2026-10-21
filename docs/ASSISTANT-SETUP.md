@@ -73,12 +73,64 @@ Honest notes:
   learners see text immediately, but a very long reply on a slow model can be
   cut off at that limit. Keep "Max output tokens per reply" modest (the
   default 700 is fine) and prefer fast models.
-- A rough cost picture with `openai/gpt-4o-mini` (about $0.15 per million input
-  tokens and $0.60 per million output tokens at the time of writing): a typical
-  lesson question with code context is 1,500–3,000 input tokens and 200–500
-  output tokens, so roughly $0.0005–$0.001 per message; 10 learners × 30
-  messages a day is about $0.15–$0.30 per day. Check the model page on
-  OpenRouter for current prices; the test button shows them.
+- A rough cost picture with the default `google/gemini-3.1-flash-lite`
+  ($0.25 per million input tokens and $1.50 per million output tokens, checked
+  2026-10-21): 1,500–3,000 input tokens and 200–500 billed output tokens cost
+  $0.000675–$0.0015 per message. 10 learners × 30 messages per day cost about
+  $0.20–$0.45 per day. This excludes extra reasoning tokens, fees and any
+  provider-specific pricing; Hebrew tokenization and conversation history can
+  change token counts. Check current prices and actual usage after switching.
+
+## Model selection and retirement migration (2026-10-21)
+
+The default is **Google Gemini 3.1 Flash Lite**. OpenRouter's October 19, 2026
+notice says GPT-4o mini, GPT-4o, GPT-4.1 and GPT-4.1 mini retire on
+**January 14, 2027**; requests to those models will fail afterward.
+
+The following IDs were present in the [OpenRouter model catalog](https://openrouter.ai/api/v1/models)
+on 2026-10-21. Prices are USD per million input/output tokens, not guaranteed
+future availability or a quality ranking.
+
+| Candidate | Input / output | Assessment for this tutor |
+|---|---|---|
+| [Gemini 3.1 Flash Lite](https://openrouter.ai/google/gemini-3.1-flash-lite) | $0.25 / $1.50 | Selected: GA, low latency and economical short replies; a practical candidate for bilingual beginner explanations. |
+| [Gemini 2.5 Flash Lite](https://openrouter.ai/google/gemini-2.5-flash-lite) | $0.10 / $0.40 | Cheaper older generation; lifecycle/access uncertainty makes it a less suitable new default. |
+| [Qwen3 235B A22B Instruct 2507](https://openrouter.ai/qwen/qwen3-235b-a22b-2507) | $0.09 / $0.55 | Economical multilingual/code alternative without thinking mode; provider speed and price vary, and Hebrew teaching quality needs evaluation. |
+
+Google lists English and Hebrew among [Gemini's supported languages](https://ai.google.dev/gemini-api/docs/models/gemini).
+The selection is based on documented capabilities and cost, **not a live
+English/Hebrew tutoring benchmark**. All three fit the chat-completions API;
+the chosen model advertises support for the existing max_tokens and temperature
+parameters. No paid inference was performed for this migration.
+
+**Existing sites need a separate configuration check.** loadConfig merges stored
+settings over defaults. Redeploying does not replace a model saved in Netlify
+Blobs (or the local file store), even if it is retiring. Do not delete the store
+or rotate secrets to change a model.
+
+1. Deploy this change, then inspect `GET /api/assistant/status` for the effective
+   model. This public endpoint reveals no key. It cannot distinguish a stored
+   selection from a default.
+2. Sign in at `/#/owner`. If a retiring model is selected, set the model to
+   `google/gemini-3.1-flash-lite` and save settings before January 14, 2027.
+   A supported owner-selected model may be retained.
+3. Run **Test key and model** and confirm both model availability and a nonempty
+   successful sample; then test actual lesson help in English and Hebrew.
+4. Ask “Why does range(3) print 0, 1, 2?” and “למה range(3) מדפיס 0, 1, 2?”;
+   check correct Python, the requested language, a concise beginner explanation,
+   and hints rather than an unsolicited full exercise solution. Also test a
+   syntax error with lesson context, streaming completion within 700 output
+   tokens, and reported cost. The mock language test verifies plumbing only.
+5. Review usage and budget settings before enabling learner access. If quality
+   or availability is inadequate, test another supported candidate and save it;
+   do not roll back to a retiring model.
+
+A read-only check of the README's live site on 2026-10-21 returned
+`model: openai/gpt-4o-mini`, `serverConfigured: false`,
+`keyConfigured: false`, and `learnerAccess: false`. Tutoring was disabled.
+The effective model is confirmed, but whether that value is persisted remains
+unknown. After deployment, repeat the status check; if the old value remains,
+the owner must save a replacement separately.
 
 ## Security properties (and their tests)
 

@@ -538,7 +538,7 @@ export const he: Dict<typeof en> = {
     testSample: 'תשובת דוגמה',
     testSampleCost: 'עלות',
     modelTitle: 'מודל וגישה',
-    modelHow: 'מזהה המודל כפי שמופיע ב-openrouter.ai/models, למשל openai/gpt-4o-mini או anthropic/claude-sonnet-4.5. מודלים זולים שומרים על עלות סבירה לפיילוט; בדקו אחרי כל שינוי.',
+    modelHow: 'מזהה המודל כפי שמופיע ב-openrouter.ai/models, למשל google/gemini-3.1-flash-lite או anthropic/claude-sonnet-4.5. מודלים זולים שומרים על עלות סבירה לפיילוט; בדקו אחרי כל שינוי.',
     modelId: 'מזהה המודל',
     learnerAccess: 'לאפשר ללומדים להשתמש בעוזר ה-AI',
     learnerAccessNote: 'כבוי כברירת מחדל: רק אתם (מחוברים כבעל האתר) יכולים לשוחח. הפעילו לקראת הפיילוט אחרי שבדיקת המפתח עוברת. כל בקשה של לומד עוברת דרך השרת הזה ונספרת מול המגבלות שלמטה.',

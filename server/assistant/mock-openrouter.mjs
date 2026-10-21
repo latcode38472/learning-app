@@ -56,7 +56,7 @@ export function createMockFetch({ reply = 'Hello! Let us look at your code toget
     if (url.endsWith('/models')) {
       return jsonResponse(200, {
         data: [
-          { id: 'openai/gpt-4o-mini', name: 'OpenAI: GPT-4o-mini', pricing: { prompt: '0.00000015', completion: '0.0000006' }, context_length: 128000 },
+          { id: 'google/gemini-3.1-flash-lite', name: 'Google: Gemini 3.1 Flash Lite', pricing: { prompt: '0.00000025', completion: '0.0000015' }, context_length: 1048576 },
           { id: 'mock/slow', name: 'Mock slow model', pricing: { prompt: '0', completion: '0' }, context_length: 8000 },
           { id: 'mock/broken', name: 'Mock broken model', pricing: { prompt: '0', completion: '0' }, context_length: 8000 },
           { id: 'mock/midstream-error', name: 'Mock mid-stream error', pricing: { prompt: '0', completion: '0' }, context_length: 8000 },
@@ -88,7 +88,7 @@ export function createMockFetch({ reply = 'Hello! Let us look at your code toget
         frames.push(chunk({}, 'stop'));
         const completion = Math.max(1, words.length);
         const prompt = Math.ceil((body.messages ?? []).reduce((n, m) => n + String(m.content).length, 0) / 4);
-        frames.push(`data: ${JSON.stringify({ id: 'gen-mock', object: 'chat.completion.chunk', model, choices: [{ index: 0, delta: {}, finish_reason: 'stop' }], usage: { prompt_tokens: prompt, completion_tokens: completion, total_tokens: prompt + completion, cost: (prompt * 0.15 + completion * 0.6) / 1_000_000 } })}\n\n`);
+        frames.push(`data: ${JSON.stringify({ id: 'gen-mock', object: 'chat.completion.chunk', model, choices: [{ index: 0, delta: {}, finish_reason: 'stop' }], usage: { prompt_tokens: prompt, completion_tokens: completion, total_tokens: prompt + completion, cost: (prompt * 0.25 + completion * 1.5) / 1_000_000 } })}\n\n`);
       }
       frames.push('data: [DONE]\n\n');
       return new Response(sse(frames, init.signal), { status: 200, headers: { 'Content-Type': 'text/event-stream' } });

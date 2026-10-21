@@ -537,7 +537,7 @@ export const en = {
     testSample: 'Sample reply',
     testSampleCost: 'cost',
     modelTitle: 'Model and access',
-    modelHow: 'The model id as shown on openrouter.ai/models, for example openai/gpt-4o-mini or anthropic/claude-sonnet-4.5. Cheaper models keep the pilot affordable; test after changing.',
+    modelHow: 'The model id as shown on openrouter.ai/models, for example google/gemini-3.1-flash-lite or anthropic/claude-sonnet-4.5. Cheaper models keep the pilot affordable; test after changing.',
     modelId: 'Model id',
     learnerAccess: 'Let learners use the AI assistant',
     learnerAccessNote: 'Off by default: only you (signed in as owner) can chat. Switch on for the pilot once the key test passes. Every learner request goes through this server and counts against the limits below.',
